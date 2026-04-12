@@ -16,7 +16,7 @@ export default async function handler(req) {
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-opus-4-5',
+        model: 'claude-haiku-4-5-20251001',
         max_tokens: 500,
         messages: [{
           role: 'user',
@@ -45,7 +45,16 @@ Only return the JSON. No explanation.`
       })
     });
 
-    const data = await response.json();
+    const rawText = await response.text();
+
+    if (!response.ok) {
+      return new Response(JSON.stringify({ error: `API error ${response.status}: ${rawText}` }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    const data = JSON.parse(rawText);
     return new Response(JSON.stringify(data), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
