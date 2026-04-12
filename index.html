@@ -9,394 +9,148 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Serif+Display&display=swap" rel="stylesheet">
 <style>
   :root {
-    --black: #0f0f0f;
-    --white: #fafaf8;
-    --grey-50: #f5f5f3;
-    --grey-100: #e8e8e4;
-    --grey-200: #d0d0ca;
-    --grey-400: #9a9a92;
-    --grey-600: #5c5c56;
-    --accent: #c8a96e;
-    --accent-dark: #a8893e;
-    --danger: #c0392b;
-    --radius: 4px;
-    --radius-lg: 8px;
+    --black:#0f0f0f;--white:#fafaf8;--grey-50:#f5f5f3;--grey-100:#e8e8e4;
+    --grey-200:#d0d0ca;--grey-400:#9a9a92;--grey-600:#5c5c56;
+    --accent:#c8a96e;--accent-dark:#a8893e;--danger:#c0392b;--success:#27500A;
+    --radius:4px;--radius-lg:8px;
   }
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { font-size: 16px; }
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--grey-50);
-    color: var(--black);
-    min-height: 100vh;
-    font-weight: 400;
-  }
-
-  /* ── Header ── */
-  header {
-    background: var(--black);
-    color: var(--white);
-    padding: 0 2rem;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    border-bottom: 1px solid #222;
-  }
-  .logo {
-    font-family: 'DM Serif Display', serif;
-    font-size: 1.25rem;
-    letter-spacing: .01em;
-    color: var(--white);
-  }
-  .logo span { color: var(--accent); }
-  .header-tag {
-    font-size: .75rem;
-    color: var(--grey-400);
-    letter-spacing: .08em;
-    text-transform: uppercase;
-  }
-
-  /* ── Layout ── */
-  .container {
-    max-width: 760px;
-    margin: 0 auto;
-    padding: 2rem 1.5rem 4rem;
-  }
-  .page-title {
-    font-family: 'DM Serif Display', serif;
-    font-size: 1.75rem;
-    font-weight: 400;
-    margin-bottom: .25rem;
-    color: var(--black);
-  }
-  .page-sub {
-    font-size: .85rem;
-    color: var(--grey-400);
-    margin-bottom: 2rem;
-    letter-spacing: .02em;
-  }
-
-  /* ── Cards ── */
-  .card {
-    background: var(--white);
-    border: 1px solid var(--grey-100);
-    border-radius: var(--radius-lg);
-    padding: 1.5rem;
-    margin-bottom: 1rem;
-  }
-  .sec-label {
-    font-size: .7rem;
-    font-weight: 500;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: var(--grey-400);
-    margin-bottom: 1rem;
-    padding-bottom: .5rem;
-    border-bottom: 1px solid var(--grey-100);
-  }
-  .divider {
-    height: 1px;
-    background: var(--grey-100);
-    margin: 1.25rem 0;
-  }
-
-  /* ── Form grid ── */
-  .grid { display: grid; gap: .875rem; }
-  .grid-2 { grid-template-columns: repeat(2, 1fr); }
-  .grid-3 { grid-template-columns: repeat(3, 1fr); }
-  @media(max-width: 540px) {
-    .grid-3 { grid-template-columns: repeat(2, 1fr); }
-    .grid-2 { grid-template-columns: 1fr; }
-  }
-
-  .fgroup { display: flex; flex-direction: column; gap: .375rem; }
-  .fgroup label {
-    font-size: .75rem;
-    font-weight: 500;
-    color: var(--grey-600);
-    letter-spacing: .03em;
-  }
-  .fgroup input, .fgroup select {
-    width: 100%;
-    height: 40px;
-    padding: 0 .75rem;
-    border: 1px solid var(--grey-200);
-    border-radius: var(--radius);
-    font-family: 'DM Sans', sans-serif;
-    font-size: .9rem;
-    color: var(--black);
-    background: var(--white);
-    transition: border-color .15s;
-    appearance: none;
-    -webkit-appearance: none;
-  }
-  .fgroup select {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239a9a92' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right .75rem center;
-    padding-right: 2.25rem;
-    cursor: pointer;
-  }
-  .fgroup input:focus, .fgroup select:focus {
-    outline: none;
-    border-color: var(--accent);
-  }
-  .fgroup input::placeholder { color: var(--grey-200); }
-
-  /* ── Breakdown ── */
-  .breakdown-empty {
-    text-align: center;
-    padding: 2rem;
-    color: var(--grey-400);
-    font-size: .875rem;
-  }
-  .brow {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    padding: .5rem 0;
-    font-size: .9rem;
-    border-bottom: 1px solid var(--grey-50);
-  }
-  .brow:last-of-type { border-bottom: none; }
-  .brow .label { color: var(--grey-600); }
-  .brow .val { font-weight: 500; color: var(--black); }
-  .brow.sub { padding: .15rem 0 .15rem 1rem; }
-  .brow.sub .label { font-size: .78rem; color: var(--grey-400); }
-  .brow.sub .val { font-size: .78rem; font-weight: 400; color: var(--grey-400); }
-  .brow.info .label { color: var(--grey-400); font-size: .82rem; }
-  .brow.info .val { font-size: .82rem; font-weight: 400; color: var(--grey-600); }
-  .brow.info { padding: .3rem 0; }
-  .total-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    padding: 1rem 0 0;
-    margin-top: .5rem;
-    border-top: 2px solid var(--black);
-  }
-  .total-row .label { font-size: 1rem; font-weight: 500; }
-  .total-row .val { font-size: 1.4rem; font-weight: 500; font-family: 'DM Serif Display', serif; color: var(--black); }
-  .info-divider { height: 1px; background: var(--grey-100); margin: .75rem 0; }
-
-  /* height badge */
-  .hbadge {
-    display: inline-block;
-    font-size: .68rem;
-    font-weight: 500;
-    padding: 1px 7px;
-    border-radius: 20px;
-    margin-left: 6px;
-    vertical-align: middle;
-  }
-  .hbadge-36 { background: #DEEAF1; color: #0C447C; }
-  .hbadge-42 { background: #D9EAD3; color: #27500A; }
-
-  /* colour dot */
-  .cdot {
-    display: inline-block;
-    width: 9px; height: 9px;
-    border-radius: 50%;
-    border: 1px solid var(--grey-200);
-    margin-right: 5px;
-    vertical-align: middle;
-  }
-
-  /* ── Buttons ── */
-  .btn-row {
-    display: flex;
-    justify-content: flex-end;
-    gap: .5rem;
-    margin-top: 1rem;
-  }
-  .btn {
-    height: 40px;
-    padding: 0 1.25rem;
-    border-radius: var(--radius);
-    font-family: 'DM Sans', sans-serif;
-    font-size: .875rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all .15s;
-    letter-spacing: .02em;
-  }
-  .btn-ghost {
-    background: transparent;
-    border: 1px solid var(--grey-200);
-    color: var(--grey-600);
-  }
-  .btn-ghost:hover { border-color: var(--grey-400); color: var(--black); }
-  .btn-primary {
-    background: var(--black);
-    border: 1px solid var(--black);
-    color: var(--white);
-  }
-  .btn-primary:hover { background: #2a2a2a; }
-
-  /* ── Toast ── */
-  .toast {
-    position: fixed;
-    bottom: 1.5rem;
-    right: 1.5rem;
-    background: var(--black);
-    color: var(--white);
-    padding: .75rem 1.25rem;
-    border-radius: var(--radius-lg);
-    font-size: .85rem;
-    opacity: 0;
-    transform: translateY(8px);
-    transition: all .25s;
-    pointer-events: none;
-    z-index: 999;
-  }
-  .toast.show { opacity: 1; transform: translateY(0); }
-
-  /* ── Saved quotes ── */
-  .saved-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-  }
-  .saved-count {
-    font-size: .75rem;
-    color: var(--grey-400);
-    background: var(--grey-50);
-    border: 1px solid var(--grey-100);
-    padding: 2px 10px;
-    border-radius: 20px;
-  }
-  .quote-item {
-    border: 1px solid var(--grey-100);
-    border-radius: var(--radius);
-    padding: .875rem 1rem;
-    margin-bottom: .5rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: .75rem;
-    background: var(--white);
-    transition: border-color .15s;
-  }
-  .quote-item:hover { border-color: var(--grey-200); }
-  .qi-left { flex: 1; min-width: 0; }
-  .qi-name { font-size: .9rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .qi-meta { font-size: .78rem; color: var(--grey-400); margin-top: 2px; }
-  .qi-total { font-size: 1rem; font-weight: 500; font-family: 'DM Serif Display', serif; white-space: nowrap; }
-  .qi-del {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--grey-400);
-    font-size: 1.1rem;
-    padding: 4px;
-    line-height: 1;
-    transition: color .15s;
-  }
-  .qi-del:hover { color: var(--danger); }
-  .no-quotes { text-align: center; padding: 1.5rem; color: var(--grey-400); font-size: .875rem; }
-
-  /* ── Tabs ── */
-  .tabs {
-    display: flex;
-    gap: 0;
-    margin-bottom: 1.5rem;
-    border-bottom: 1px solid var(--grey-100);
-  }
-  .tab-btn {
-    padding: .625rem 1.25rem;
-    font-family: 'DM Sans', sans-serif;
-    font-size: .85rem;
-    font-weight: 500;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--grey-400);
-    border-bottom: 2px solid transparent;
-    margin-bottom: -1px;
-    transition: all .15s;
-    letter-spacing: .02em;
-  }
-  .tab-btn.active { color: var(--black); border-bottom-color: var(--accent); }
-  .tab-pane { display: none; }
-  .tab-pane.active { display: block; }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',sans-serif;background:var(--grey-50);color:var(--black);min-height:100vh}
+  header{background:var(--black);color:var(--white);padding:0 2rem;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;border-bottom:1px solid #222}
+  .logo{font-family:'DM Serif Display',serif;font-size:1.25rem;color:var(--white)}
+  .logo span{color:var(--accent)}
+  .header-tag{font-size:.75rem;color:var(--grey-400);letter-spacing:.08em;text-transform:uppercase}
+  .container{max-width:760px;margin:0 auto;padding:2rem 1.5rem 4rem}
+  .page-title{font-family:'DM Serif Display',serif;font-size:1.75rem;font-weight:400;margin-bottom:.25rem}
+  .page-sub{font-size:.85rem;color:var(--grey-400);margin-bottom:2rem;letter-spacing:.02em}
+  .card{background:var(--white);border:1px solid var(--grey-100);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
+  .sec-label{font-size:.7rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--grey-400);margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid var(--grey-100)}
+  .divider{height:1px;background:var(--grey-100);margin:1.25rem 0}
+  .grid{display:grid;gap:.875rem}
+  .grid-3{grid-template-columns:repeat(3,1fr)}
+  @media(max-width:540px){.grid-3{grid-template-columns:repeat(2,1fr)}}
+  .fgroup{display:flex;flex-direction:column;gap:.375rem}
+  .fgroup label{font-size:.75rem;font-weight:500;color:var(--grey-600);letter-spacing:.03em}
+  .fgroup input,.fgroup select{width:100%;height:40px;padding:0 .75rem;border:1px solid var(--grey-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:.9rem;color:var(--black);background:var(--white);transition:border-color .15s;appearance:none;-webkit-appearance:none}
+  .fgroup select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239a9a92' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .75rem center;padding-right:2.25rem;cursor:pointer}
+  .fgroup input:focus,.fgroup select:focus{outline:none;border-color:var(--accent)}
+  .fgroup input::placeholder{color:var(--grey-200)}
+  .fgroup input.ai-filled{border-color:var(--accent);background:#fffbf4}
+  .brow{display:flex;justify-content:space-between;align-items:baseline;padding:.5rem 0;font-size:.9rem;border-bottom:1px solid var(--grey-50)}
+  .brow:last-of-type{border-bottom:none}
+  .brow .label{color:var(--grey-600)}.brow .val{font-weight:500;color:var(--black)}
+  .brow.sub{padding:.15rem 0 .15rem 1rem}
+  .brow.sub .label{font-size:.78rem;color:var(--grey-400)}
+  .brow.sub .val{font-size:.78rem;font-weight:400;color:var(--grey-400)}
+  .brow.info .label{color:var(--grey-400);font-size:.82rem}
+  .brow.info .val{font-size:.82rem;font-weight:400;color:var(--grey-600)}
+  .brow.info{padding:.3rem 0}
+  .total-row{display:flex;justify-content:space-between;align-items:baseline;padding:1rem 0 0;margin-top:.5rem;border-top:2px solid var(--black)}
+  .total-row .label{font-size:1rem;font-weight:500}
+  .total-row .val{font-size:1.4rem;font-weight:500;font-family:'DM Serif Display',serif}
+  .info-divider{height:1px;background:var(--grey-100);margin:.75rem 0}
+  .breakdown-empty{text-align:center;padding:2rem;color:var(--grey-400);font-size:.875rem}
+  .hbadge{display:inline-block;font-size:.68rem;font-weight:500;padding:1px 7px;border-radius:20px;margin-left:6px;vertical-align:middle}
+  .hbadge-36{background:#DEEAF1;color:#0C447C}.hbadge-42{background:#D9EAD3;color:#27500A}
+  .cdot{display:inline-block;width:9px;height:9px;border-radius:50%;border:1px solid var(--grey-200);margin-right:5px;vertical-align:middle}
+  .btn-row{display:flex;justify-content:flex-end;gap:.5rem;margin-top:1rem}
+  .btn{height:40px;padding:0 1.25rem;border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:.875rem;font-weight:500;cursor:pointer;transition:all .15s;letter-spacing:.02em}
+  .btn-ghost{background:transparent;border:1px solid var(--grey-200);color:var(--grey-600)}
+  .btn-ghost:hover{border-color:var(--grey-400);color:var(--black)}
+  .btn-primary{background:var(--black);border:1px solid var(--black);color:var(--white)}
+  .btn-primary:hover{background:#2a2a2a}
+  .scan-zone{border:1.5px dashed var(--grey-200);border-radius:var(--radius-lg);padding:1.5rem;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;margin-bottom:.75rem;position:relative}
+  .scan-zone:hover{border-color:var(--accent);background:#fffbf4}
+  .scan-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+  .scan-icon{font-size:1.75rem;margin-bottom:.5rem}
+  .scan-label{font-size:.9rem;font-weight:500;color:var(--grey-600)}
+  .scan-sub{font-size:.78rem;color:var(--grey-400);margin-top:.25rem}
+  .scan-preview{max-width:100%;max-height:180px;border-radius:var(--radius);margin-top:1rem;display:none;object-fit:contain;border:1px solid var(--grey-100)}
+  .scan-status{margin-top:.75rem;font-size:.85rem}
+  .scan-status.loading{color:var(--accent-dark)}
+  .scan-status.success{color:var(--success);font-weight:500}
+  .scan-status.error{color:var(--danger)}
+  .ai-note{font-size:.75rem;color:var(--grey-400);margin-top:.5rem;font-style:italic}
+  .tabs{display:flex;margin-bottom:1.5rem;border-bottom:1px solid var(--grey-100)}
+  .tab-btn{padding:.625rem 1.25rem;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:500;background:none;border:none;cursor:pointer;color:var(--grey-400);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
+  .tab-btn.active{color:var(--black);border-bottom-color:var(--accent)}
+  .tab-pane{display:none}.tab-pane.active{display:block}
+  .saved-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+  .saved-count{font-size:.75rem;color:var(--grey-400);background:var(--grey-50);border:1px solid var(--grey-100);padding:2px 10px;border-radius:20px}
+  .quote-item{border:1px solid var(--grey-100);border-radius:var(--radius);padding:.875rem 1rem;margin-bottom:.5rem;display:flex;justify-content:space-between;align-items:center;gap:.75rem;background:var(--white)}
+  .qi-left{flex:1;min-width:0}
+  .qi-name{font-size:.9rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .qi-meta{font-size:.78rem;color:var(--grey-400);margin-top:2px}
+  .qi-total{font-size:1rem;font-weight:500;font-family:'DM Serif Display',serif;white-space:nowrap}
+  .qi-del{background:none;border:none;cursor:pointer;color:var(--grey-400);font-size:1.1rem;padding:4px;line-height:1;transition:color .15s}
+  .qi-del:hover{color:var(--danger)}
+  .no-quotes{text-align:center;padding:1.5rem;color:var(--grey-400);font-size:.875rem}
+  .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--black);color:var(--white);padding:.75rem 1.25rem;border-radius:var(--radius-lg);font-size:.85rem;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;z-index:999}
+  .toast.show{opacity:1;transform:translateY(0)}
 </style>
 </head>
 <body>
-
 <header>
   <div class="logo">Tycon <span>Railings</span></div>
   <div class="header-tag">Internal Quote Tool</div>
 </header>
-
 <div class="container">
   <p class="page-title">Quote Calculator</p>
   <p class="page-sub">Prices in CAD &mdash; for internal use only</p>
-
   <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('calculator', this)">Calculator</button>
-    <button class="tab-btn" onclick="switchTab('saved', this)">Saved quotes</button>
+    <button class="tab-btn active" onclick="switchTab('calculator',this)">Calculator</button>
+    <button class="tab-btn" onclick="switchTab('saved',this)">Saved quotes</button>
   </div>
 
-  <!-- ══ CALCULATOR TAB ══ -->
   <div class="tab-pane active" id="tab-calculator">
+    <div class="card">
+      <p class="sec-label">Scan site sketch</p>
+      <div class="scan-zone" id="scan-zone">
+        <input type="file" accept="image/*" capture="environment" id="photo-input" onchange="handlePhoto(event)">
+        <div class="scan-icon">&#128247;</div>
+        <div class="scan-label">Take a photo or upload a sketch</div>
+        <div class="scan-sub">The app will read measurements and fill the form automatically</div>
+        <img class="scan-preview" id="scan-preview" alt="Sketch preview">
+        <div class="scan-status" id="scan-status"></div>
+      </div>
+      <div class="ai-note" id="ai-note" style="display:none">&#10003; Fields highlighted in gold were filled by AI — please review before saving.</div>
+      <button class="btn btn-ghost" id="clear-photo-btn" style="display:none;margin-top:.5rem" onclick="clearPhoto()">Clear photo</button>
+    </div>
 
     <div class="card">
       <p class="sec-label">Railing</p>
       <div class="grid grid-3">
-        <div class="fgroup">
-          <label>Railing type</label>
-          <select id="railing-type" onchange="calc()">
-            <option value="">— select —</option>
-          </select>
+        <div class="fgroup"><label>Railing type</label>
+          <select id="railing-type" onchange="calc()"><option value="">— select —</option></select>
         </div>
-        <div class="fgroup">
-          <label>Height</label>
-          <select id="railing-height" onchange="calc()">
-            <option value="36">36"</option>
-            <option value="42">42"</option>
-          </select>
+        <div class="fgroup"><label>Height</label>
+          <select id="railing-height" onchange="calc()"><option value="36">36"</option><option value="42">42"</option></select>
         </div>
-        <div class="fgroup">
-          <label>Linear feet</label>
+        <div class="fgroup"><label>Linear feet</label>
           <input type="number" id="linear-ft" min="0" placeholder="0" oninput="calc()">
         </div>
       </div>
-
       <div class="divider"></div>
       <p class="sec-label">Posts</p>
       <div class="grid grid-3">
-        <div class="fgroup">
-          <label>Post size</label>
-          <select id="post-size" onchange="calc()">
-            <option value="2">2"</option>
-            <option value="3">3"</option>
-            <option value="4">4"</option>
-          </select>
+        <div class="fgroup"><label>Post size</label>
+          <select id="post-size" onchange="calc()"><option value="2">2"</option><option value="3">3"</option><option value="4">4"</option></select>
         </div>
-        <div class="fgroup">
-          <label>Number of posts</label>
+        <div class="fgroup"><label>Number of posts</label>
           <input type="number" id="post-qty" min="0" placeholder="0" oninput="calc()">
         </div>
       </div>
-
       <div class="divider"></div>
       <p class="sec-label">Spindles</p>
       <div class="grid grid-3">
-        <div class="fgroup">
-          <label>Spindle type</label>
+        <div class="fgroup"><label>Spindle type</label>
           <select id="spindle-type" onchange="calc()">
             <option value="WALL-regular">WALL — Regular</option>
             <option value="WALL-platinum">WALL — Platinum</option>
             <option value="MINI-regular">MINI — Regular</option>
           </select>
         </div>
-        <div class="fgroup">
-          <label>Number of spindles</label>
+        <div class="fgroup"><label>Number of spindles</label>
           <input type="number" id="spindle-qty" min="0" placeholder="0" oninput="calc()">
         </div>
       </div>
@@ -405,30 +159,22 @@
     <div class="card">
       <p class="sec-label">Job details</p>
       <div class="grid grid-3">
-        <div class="fgroup">
-          <label>Colour</label>
+        <div class="fgroup"><label>Colour</label>
           <select id="colour" onchange="calc()">
-            <option value="Black">Black</option>
-            <option value="Pewter">Pewter</option>
-            <option value="White">White</option>
-            <option value="Brown">Brown</option>
-            <option value="Clay">Clay</option>
-            <option value="Sandlewood">Sandlewood</option>
+            <option value="Black">Black</option><option value="Pewter">Pewter</option>
+            <option value="White">White</option><option value="Brown">Brown</option>
+            <option value="Clay">Clay</option><option value="Sandlewood">Sandlewood</option>
             <option value="Cashmere">Cashmere</option>
           </select>
         </div>
-        <div class="fgroup">
-          <label>Handrail profile</label>
+        <div class="fgroup"><label>Handrail profile</label>
           <select id="handrail" onchange="calc()">
-            <option value="Empress">Empress</option>
-            <option value="Sprint">Sprint</option>
-            <option value="Elite">Elite</option>
-            <option value="Moderna">Moderna</option>
+            <option value="Empress">Empress</option><option value="Sprint">Sprint</option>
+            <option value="Elite">Elite</option><option value="Moderna">Moderna</option>
             <option value="Primo">Primo</option>
           </select>
         </div>
-        <div class="fgroup">
-          <label>Install cost ($)</label>
+        <div class="fgroup"><label>Install cost ($)</label>
           <input type="number" id="install-cost" min="0" placeholder="0" oninput="calc()">
         </div>
       </div>
@@ -436,19 +182,14 @@
 
     <div class="card">
       <p class="sec-label">Quote breakdown</p>
-      <div id="breakdown-body">
-        <div class="breakdown-empty">Fill in the fields above to generate a quote.</div>
-      </div>
+      <div id="breakdown-body"><div class="breakdown-empty">Fill in the fields above to generate a quote.</div></div>
     </div>
-
     <div class="btn-row">
       <button class="btn btn-ghost" onclick="resetAll()">Clear</button>
       <button class="btn btn-primary" onclick="saveQuote()">Save quote</button>
     </div>
-
   </div>
 
-  <!-- ══ SAVED QUOTES TAB ══ -->
   <div class="tab-pane" id="tab-saved">
     <div class="card">
       <div class="saved-header">
@@ -458,9 +199,7 @@
       <div id="saved-list"><div class="no-quotes">No saved quotes yet.</div></div>
     </div>
   </div>
-
 </div>
-
 <div class="toast" id="toast"></div>
 
 <script>
@@ -480,152 +219,126 @@ const RAILINGS=[
 ];
 const POSTS={"2":40,"3":42,"4":57};
 const SPINDLES={"WALL-regular":4,"WALL-platinum":6,"MINI-regular":1};
-const COLOUR_DOTS={
-  "Black":"#1a1a1a","Pewter":"#8e8e8e","White":"#e8e8e4",
-  "Brown":"#6b3a2a","Clay":"#b5956a","Sandlewood":"#c8a882","Cashmere":"#d4c4a8"
-};
+const COLOUR_DOTS={"Black":"#1a1a1a","Pewter":"#8e8e8e","White":"#e8e8e4","Brown":"#6b3a2a","Clay":"#b5956a","Sandlewood":"#c8a882","Cashmere":"#d4c4a8"};
 
-let savedQuotes = JSON.parse(localStorage.getItem('tycon_quotes') || '[]');
+let savedQuotes=JSON.parse(localStorage.getItem('tycon_quotes')||'[]');
+let lastTotal=0,lastSnapshot=null;
 
-const rtSel = document.getElementById('railing-type');
-RAILINGS.forEach(r => {
-  const o = document.createElement('option');
-  o.value = r.code; o.textContent = r.code;
-  rtSel.appendChild(o);
-});
+const rtSel=document.getElementById('railing-type');
+RAILINGS.forEach(r=>{const o=document.createElement('option');o.value=r.code;o.textContent=r.code;rtSel.appendChild(o);});
 
-function fmt(n){ return '$' + Math.round(n).toLocaleString('en-CA'); }
-
-let lastTotal = 0;
-let lastSnapshot = null;
+function fmt(n){return'$'+Math.round(n).toLocaleString('en-CA')}
 
 function calc(){
-  const colour   = document.getElementById('colour').value;
-  const handrail = document.getElementById('handrail').value;
-  const install  = parseFloat(document.getElementById('install-cost').value) || 0;
-  const railCode = document.getElementById('railing-type').value;
-  const height   = document.getElementById('railing-height').value;
-  const linFt    = parseFloat(document.getElementById('linear-ft').value) || 0;
-  const postSize = document.getElementById('post-size').value;
-  const postQty  = parseFloat(document.getElementById('post-qty').value) || 0;
-  const spType   = document.getElementById('spindle-type').value;
-  const spQty    = parseFloat(document.getElementById('spindle-qty').value) || 0;
+  const colour=document.getElementById('colour').value;
+  const handrail=document.getElementById('handrail').value;
+  const install=parseFloat(document.getElementById('install-cost').value)||0;
+  const railCode=document.getElementById('railing-type').value;
+  const height=document.getElementById('railing-height').value;
+  const linFt=parseFloat(document.getElementById('linear-ft').value)||0;
+  const postSize=document.getElementById('post-size').value;
+  const postQty=parseFloat(document.getElementById('post-qty').value)||0;
+  const spType=document.getElementById('spindle-type').value;
+  const spQty=parseFloat(document.getElementById('spindle-qty').value)||0;
+  const hasData=(railCode&&linFt>0)||postQty>0||spQty>0||install>0;
+  if(!hasData){document.getElementById('breakdown-body').innerHTML='<div class="breakdown-empty">Fill in the fields above to generate a quote.</div>';lastTotal=0;lastSnapshot=null;return;}
+  let rows='',total=0;
+  const dot=COLOUR_DOTS[colour]||'#ccc';
+  rows+=`<div class="brow info"><span class="label">Colour</span><span class="val"><span class="cdot" style="background:${dot}"></span>${colour}</span></div>`;
+  rows+=`<div class="brow info"><span class="label">Handrail profile</span><span class="val">${handrail}</span></div>`;
+  rows+=`<div class="info-divider"></div>`;
+  if(railCode&&linFt>0){const r=RAILINGS.find(x=>x.code===railCode);const rate=height==='42'?r.p42:r.p36;const cost=rate*linFt;total+=cost;const badge=`<span class="hbadge hbadge-${height}">${height}"</span>`;rows+=`<div class="brow"><span class="label">Railing ${railCode}${badge}</span><span class="val">${fmt(cost)}</span></div><div class="brow sub"><span class="label">${fmt(rate)}/ft &times; ${linFt} ft</span><span class="val"></span></div>`;}
+  if(postQty>0){const rate=POSTS[postSize];const cost=rate*postQty;total+=cost;rows+=`<div class="brow"><span class="label">Posts (${postSize}")</span><span class="val">${fmt(cost)}</span></div><div class="brow sub"><span class="label">${fmt(rate)}/post &times; ${postQty}</span><span class="val"></span></div>`;}
+  if(spQty>0){const rate=SPINDLES[spType];const cost=rate*spQty;total+=cost;const label=spType.replace('-',' — ');rows+=`<div class="brow"><span class="label">Spindles (${label})</span><span class="val">${fmt(cost)}</span></div><div class="brow sub"><span class="label">${fmt(rate)}/spindle &times; ${spQty}</span><span class="val"></span></div>`;}
+  if(install>0){total+=install;rows+=`<div class="brow"><span class="label">Install</span><span class="val">${fmt(install)}</span></div>`;}
+  rows+=`<div class="total-row"><span class="label">Total</span><span class="val">${fmt(total)}</span></div>`;
+  document.getElementById('breakdown-body').innerHTML=rows;
+  lastTotal=total;lastSnapshot={colour,handrail,install,railCode,height,linFt,postSize,postQty,spType,spQty,total};
+}
 
-  const hasData = (railCode && linFt > 0) || postQty > 0 || spQty > 0 || install > 0;
-  if(!hasData){
-    document.getElementById('breakdown-body').innerHTML = '<div class="breakdown-empty">Fill in the fields above to generate a quote.</div>';
-    lastTotal = 0; lastSnapshot = null;
-    return;
-  }
+async function handlePhoto(event){
+  const file=event.target.files[0];if(!file)return;
+  const preview=document.getElementById('scan-preview');
+  const status=document.getElementById('scan-status');
+  const note=document.getElementById('ai-note');
+  const clearBtn=document.getElementById('clear-photo-btn');
+  const reader=new FileReader();
+  reader.onload=async(e)=>{
+    const base64=e.target.result.split(',')[1];
+    const mediaType=file.type||'image/jpeg';
+    preview.src=e.target.result;preview.style.display='block';
+    clearBtn.style.display='inline-flex';note.style.display='none';
+    status.className='scan-status loading';status.textContent='Reading your sketch...';
+    try{
+      const res=await fetch('/api/scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({base64,mediaType})});
+      const data=await res.json();
+      if(data.error)throw new Error(data.error.message||data.error);
+      const text=data.content[0].text.trim();
+      const parsed=JSON.parse(text.replace(/```json|```/g,'').trim());
+      let filled=0;
+      if(parsed.linear_feet){const el=document.getElementById('linear-ft');el.value=parsed.linear_feet;el.classList.add('ai-filled');filled++;}
+      if(parsed.post_count){const el=document.getElementById('post-qty');el.value=parsed.post_count;el.classList.add('ai-filled');filled++;}
+      if(parsed.spindle_count){const el=document.getElementById('spindle-qty');el.value=parsed.spindle_count;el.classList.add('ai-filled');filled++;}
+      if(parsed.height_inches===36||parsed.height_inches===42){document.getElementById('railing-height').value=String(parsed.height_inches);filled++;}
+      if(filled>0){status.className='scan-status success';status.textContent=parsed.notes?`Read: ${parsed.notes}`:`${filled} field${filled>1?'s':''} filled from sketch.`;note.style.display='block';}
+      else{status.className='scan-status error';status.textContent="Couldn't read measurements. Please fill in manually.";}
+      calc();
+    }catch(err){status.className='scan-status error';status.textContent='Error: '+err.message;}
+  };
+  reader.readAsDataURL(file);
+}
 
-  let rows = '', total = 0;
-  const dot = COLOUR_DOTS[colour] || '#ccc';
-
-  rows += `<div class="brow info"><span class="label">Colour</span><span class="val"><span class="cdot" style="background:${dot}"></span>${colour}</span></div>`;
-  rows += `<div class="brow info"><span class="label">Handrail profile</span><span class="val">${handrail}</span></div>`;
-  rows += `<div class="info-divider"></div>`;
-
-  if(railCode && linFt > 0){
-    const r = RAILINGS.find(x => x.code === railCode);
-    const rate = height === '42' ? r.p42 : r.p36;
-    const cost = rate * linFt;
-    total += cost;
-    const badge = `<span class="hbadge hbadge-${height}">${height}"</span>`;
-    rows += `<div class="brow"><span class="label">Railing ${railCode}${badge}</span><span class="val">${fmt(cost)}</span></div>`;
-    rows += `<div class="brow sub"><span class="label">${fmt(rate)}/ft &times; ${linFt} ft</span><span class="val"></span></div>`;
-  }
-  if(postQty > 0){
-    const rate = POSTS[postSize];
-    const cost = rate * postQty;
-    total += cost;
-    rows += `<div class="brow"><span class="label">Posts (${postSize}")</span><span class="val">${fmt(cost)}</span></div>`;
-    rows += `<div class="brow sub"><span class="label">${fmt(rate)}/post &times; ${postQty}</span><span class="val"></span></div>`;
-  }
-  if(spQty > 0){
-    const rate = SPINDLES[spType];
-    const cost = rate * spQty;
-    total += cost;
-    const label = spType.replace('-', ' — ');
-    rows += `<div class="brow"><span class="label">Spindles (${label})</span><span class="val">${fmt(cost)}</span></div>`;
-    rows += `<div class="brow sub"><span class="label">${fmt(rate)}/spindle &times; ${spQty}</span><span class="val"></span></div>`;
-  }
-  if(install > 0){
-    total += install;
-    rows += `<div class="brow"><span class="label">Install</span><span class="val">${fmt(install)}</span></div>`;
-  }
-
-  rows += `<div class="total-row"><span class="label">Total</span><span class="val">${fmt(total)}</span></div>`;
-  document.getElementById('breakdown-body').innerHTML = rows;
-  lastTotal = total;
-  lastSnapshot = { colour, handrail, install, railCode, height, linFt, postSize, postQty, spType, spQty, total };
+function clearPhoto(){
+  document.getElementById('photo-input').value='';
+  document.getElementById('scan-preview').style.display='none';
+  document.getElementById('scan-preview').src='';
+  document.getElementById('scan-status').textContent='';
+  document.getElementById('scan-status').className='scan-status';
+  document.getElementById('ai-note').style.display='none';
+  document.getElementById('clear-photo-btn').style.display='none';
+  ['linear-ft','post-qty','spindle-qty'].forEach(id=>document.getElementById(id).classList.remove('ai-filled'));
 }
 
 function saveQuote(){
-  if(!lastSnapshot || lastTotal === 0){ showToast('Nothing to save yet.'); return; }
-  const name = prompt('Label this quote (e.g. customer name or address):');
-  if(!name) return;
-  const quote = { ...lastSnapshot, name, date: new Date().toLocaleDateString('en-CA'), id: Date.now() };
-  savedQuotes.unshift(quote);
-  localStorage.setItem('tycon_quotes', JSON.stringify(savedQuotes));
-  renderSaved();
-  showToast('Quote saved!');
+  if(!lastSnapshot||lastTotal===0){showToast('Nothing to save yet.');return;}
+  const name=prompt('Label this quote (e.g. customer name or address):');
+  if(!name)return;
+  const quote={...lastSnapshot,name,date:new Date().toLocaleDateString('en-CA'),id:Date.now()};
+  savedQuotes.unshift(quote);localStorage.setItem('tycon_quotes',JSON.stringify(savedQuotes));
+  renderSaved();showToast('Quote saved!');
 }
 
-function deleteQuote(id){
-  savedQuotes = savedQuotes.filter(q => q.id !== id);
-  localStorage.setItem('tycon_quotes', JSON.stringify(savedQuotes));
-  renderSaved();
-}
+function deleteQuote(id){savedQuotes=savedQuotes.filter(q=>q.id!==id);localStorage.setItem('tycon_quotes',JSON.stringify(savedQuotes));renderSaved();}
 
 function renderSaved(){
-  const list = document.getElementById('saved-list');
-  const count = document.getElementById('saved-count');
-  count.textContent = savedQuotes.length + ' saved';
-  if(!savedQuotes.length){
-    list.innerHTML = '<div class="no-quotes">No saved quotes yet.</div>';
-    return;
-  }
-  list.innerHTML = savedQuotes.map(q => {
-    const parts = [];
-    if(q.railCode && q.linFt) parts.push(`${q.railCode} ${q.height}" · ${q.linFt} ft`);
-    if(q.postQty) parts.push(`${q.postQty} posts (${q.postSize}")`);
-    if(q.spQty) parts.push(`${q.spQty} spindles`);
+  const list=document.getElementById('saved-list');
+  const count=document.getElementById('saved-count');
+  count.textContent=savedQuotes.length+' saved';
+  if(!savedQuotes.length){list.innerHTML='<div class="no-quotes">No saved quotes yet.</div>';return;}
+  list.innerHTML=savedQuotes.map(q=>{
+    const parts=[];
+    if(q.railCode&&q.linFt)parts.push(`${q.railCode} ${q.height}" · ${q.linFt} ft`);
+    if(q.postQty)parts.push(`${q.postQty} posts (${q.postSize}")`);
+    if(q.spQty)parts.push(`${q.spQty} spindles`);
     parts.push(q.colour);
-    return `<div class="quote-item">
-      <div class="qi-left">
-        <div class="qi-name">${q.name}</div>
-        <div class="qi-meta">${q.date} &nbsp;&middot;&nbsp; ${parts.join(' &nbsp;&middot;&nbsp; ')}</div>
-      </div>
-      <div class="qi-total">${fmt(q.total)}</div>
-      <button class="qi-del" onclick="deleteQuote(${q.id})" title="Delete">&times;</button>
-    </div>`;
+    return `<div class="quote-item"><div class="qi-left"><div class="qi-name">${q.name}</div><div class="qi-meta">${q.date} &nbsp;&middot;&nbsp; ${parts.join(' &nbsp;&middot;&nbsp; ')}</div></div><div class="qi-total">${fmt(q.total)}</div><button class="qi-del" onclick="deleteQuote(${q.id})" title="Delete">&times;</button></div>`;
   }).join('');
 }
 
-function switchTab(id, btn){
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('tab-' + id).classList.add('active');
-  if(id === 'saved') renderSaved();
+function switchTab(id,btn){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');document.getElementById('tab-'+id).classList.add('active');
+  if(id==='saved')renderSaved();
 }
 
 function resetAll(){
-  ['colour','handrail','railing-type','railing-height','post-size','spindle-type'].forEach(id => {
-    document.getElementById(id).selectedIndex = 0;
-  });
-  ['install-cost','linear-ft','post-qty','spindle-qty'].forEach(id => {
-    document.getElementById(id).value = '';
-  });
-  calc();
+  ['colour','handrail','railing-type','railing-height','post-size','spindle-type'].forEach(id=>document.getElementById(id).selectedIndex=0);
+  ['install-cost','linear-ft','post-qty','spindle-qty'].forEach(id=>{document.getElementById(id).value='';document.getElementById(id).classList.remove('ai-filled');});
+  clearPhoto();calc();
 }
 
-function showToast(msg){
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
-}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
 
 renderSaved();
 </script>
