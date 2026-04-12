@@ -115,6 +115,18 @@
   .qi-photo{width:100%;max-height:260px;object-fit:contain;border-radius:4px;border:1px solid var(--grey-100);cursor:pointer}
   .qi-photo-btn{background:none;border:1px solid var(--grey-200);border-radius:4px;cursor:pointer;padding:4px 8px;font-size:.85rem;color:var(--grey-400);transition:all .15s}
   .qi-photo-btn:hover{border-color:var(--accent);color:var(--accent-dark)}
+
+  /* Products */
+  .product-row{display:flex;align-items:center;gap:.625rem;padding:.5rem 0;border-bottom:1px solid var(--grey-50)}
+  .product-row:last-of-type{border-bottom:none}
+  .product-label{font-size:.875rem;color:var(--grey-600);flex:1;min-width:0}
+  .product-qty{width:70px;height:36px;padding:0 .5rem;border:1px solid var(--grey-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:.9rem;color:var(--black);text-align:center;background:var(--white)}
+  .product-qty:focus{outline:none;border-color:var(--accent)}
+  .product-qty.auto{background:var(--grey-50);color:var(--grey-400)}
+  .product-price{font-size:.82rem;color:var(--grey-400);white-space:nowrap;min-width:52px;text-align:right}
+  .product-select{height:36px;padding:0 2rem 0 .625rem;border:1px solid var(--grey-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:.85rem;color:var(--black);background:var(--white);appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239a9a92' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .5rem center;cursor:pointer;flex:1}
+  .product-select:focus{outline:none;border-color:var(--accent)}
+  .product-subtotal{font-size:.875rem;font-weight:500;color:var(--black);white-space:nowrap;min-width:60px;text-align:right}
   .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--black);color:var(--white);padding:.75rem 1.25rem;border-radius:var(--radius-lg);font-size:.85rem;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;z-index:999}
   .toast.show{opacity:1;transform:translateY(0)}
 </style>
@@ -219,6 +231,73 @@
         <div class="fgroup"><label>Number of spindles</label>
           <input type="number" id="spindle-qty" min="0" placeholder="0" oninput="calc()">
         </div>
+      </div>
+    </div>
+
+
+    <div class="card">
+      <p class="sec-label">Additional products</p>
+
+      <!-- Gate Addon — flat, no qty -->
+      <div class="product-row">
+        <span class="product-label">Gate addon</span>
+        <span class="product-price">$90 each</span>
+        <input type="number" class="product-qty" id="p-gate-addon" min="0" placeholder="0" oninput="calc()">
+        <span class="product-subtotal" id="ps-gate-addon"></span>
+      </div>
+
+      <!-- Self Closing Gate — flat, no qty -->
+      <div class="product-row">
+        <span class="product-label">Self closing gate (hinges &amp; latch)</span>
+        <span class="product-price">$95 each</span>
+        <input type="number" class="product-qty" id="p-sc-gate" min="0" placeholder="0" oninput="calc()">
+        <span class="product-subtotal" id="ps-sc-gate"></span>
+      </div>
+
+      <!-- Regular Gate — flat, no qty -->
+      <div class="product-row">
+        <span class="product-label">Regular gate (hinges &amp; latch)</span>
+        <span class="product-price">$85 each</span>
+        <input type="number" class="product-qty" id="p-reg-gate" min="0" placeholder="0" oninput="calc()">
+        <span class="product-subtotal" id="ps-reg-gate"></span>
+      </div>
+
+      <!-- Stair Template — qty -->
+      <div class="product-row">
+        <span class="product-label">Stair template</span>
+        <span class="product-price">$25 each</span>
+        <input type="number" class="product-qty" id="p-stair" min="0" placeholder="0" oninput="calc()">
+        <span class="product-subtotal" id="ps-stair"></span>
+      </div>
+
+      <!-- Ball Caps — auto qty -->
+      <div class="product-row">
+        <span class="product-label">Ball caps <span style="font-size:.75rem;color:var(--grey-400)">(auto from posts)</span></span>
+        <span class="product-price">$25 each</span>
+        <input type="number" class="product-qty auto" id="p-ballcaps" min="0" placeholder="0" readonly oninput="calc()">
+        <span class="product-subtotal" id="ps-ballcaps"></span>
+      </div>
+
+      <!-- Peg Leg — qty -->
+      <div class="product-row">
+        <span class="product-label">Peg leg</span>
+        <span class="product-price">$5.50 each</span>
+        <input type="number" class="product-qty" id="p-pegleg" min="0" placeholder="0" oninput="calc()">
+        <span class="product-subtotal" id="ps-pegleg"></span>
+      </div>
+
+      <!-- Columns — size dropdown + qty -->
+      <div class="product-row" style="flex-wrap:wrap;gap:.5rem">
+        <span class="product-label" style="width:100%;margin-bottom:.25rem">Column</span>
+        <select class="product-select" id="p-col-size" onchange="calc()">
+          <option value="">— select size —</option>
+          <option value="270">6&quot; 9ft — $270</option>
+          <option value="285">6&quot; 12ft — $285</option>
+          <option value="295">7.25&quot; 9ft — $295</option>
+          <option value="330">7.25&quot; 12ft — $330</option>
+        </select>
+        <input type="number" class="product-qty" id="p-col-qty" min="0" placeholder="qty" oninput="calc()" style="width:60px">
+        <span class="product-subtotal" id="ps-col"></span>
       </div>
     </div>
 
@@ -449,7 +528,36 @@ function calc(){
   const postQty=parseFloat(document.getElementById('post-qty').value)||0;
   const spType=document.getElementById('spindle-type').value;
   const spQty=parseFloat(document.getElementById('spindle-qty').value)||0;
-  const hasData=(railCode&&linFt>0)||postQty>0||spQty>0||install>0;
+
+  // Auto-fill ball caps from post qty
+  const bcEl=document.getElementById('p-ballcaps');
+  if(postQty>0){bcEl.value=postQty;}else{bcEl.value='';}
+
+  // Products
+  const products=[
+    {id:'gate-addon', price:90, label:'Gate addon'},
+    {id:'sc-gate',    price:95, label:'Self closing gate'},
+    {id:'reg-gate',   price:85, label:'Regular gate'},
+    {id:'stair',      price:25, label:'Stair template'},
+    {id:'ballcaps',   price:25, label:'Ball caps'},
+    {id:'pegleg',     price:5.5,label:'Peg leg'},
+  ];
+  let productTotal=0;
+  products.forEach(p=>{
+    const qty=parseFloat(document.getElementById('p-'+p.id).value)||0;
+    const sub=qty*p.price;
+    productTotal+=sub;
+    const el=document.getElementById('ps-'+p.id);
+    if(el)el.textContent=sub>0?fmt(sub):'';
+  });
+  // Column
+  const colSize=parseFloat(document.getElementById('p-col-size').value)||0;
+  const colQty=parseFloat(document.getElementById('p-col-qty').value)||0;
+  const colSub=colSize*colQty;
+  productTotal+=colSub;
+  document.getElementById('ps-col').textContent=colSub>0?fmt(colSub):'';
+
+  const hasData=(railCode&&linFt>0)||postQty>0||spQty>0||install>0||productTotal>0;
   if(!hasData){document.getElementById('breakdown-body').innerHTML='<div class="breakdown-empty">Fill in the fields above to generate a quote.</div>';lastTotal=0;lastSnapshot=null;return;}
   let rows='',total=0;
   const dot=COLOUR_DOTS[colour]||'#ccc';
@@ -460,9 +568,15 @@ function calc(){
   if(postQty>0){const rate=POSTS[postSize];const cost=rate*postQty;total+=cost;rows+=`<div class="brow"><span class="label">Posts (${postSize}")</span><span class="val">${fmt(cost)}</span></div><div class="brow sub"><span class="label">${fmt(rate)}/post &times; ${postQty}</span><span class="val"></span></div>`;}
   if(spQty>0){const rate=SPINDLES[spType];const cost=rate*spQty;total+=cost;const label=spType.replace('-',' — ');rows+=`<div class="brow"><span class="label">Spindles (${label})</span><span class="val">${fmt(cost)}</span></div><div class="brow sub"><span class="label">${fmt(rate)}/spindle &times; ${spQty}</span><span class="val"></span></div>`;}
   if(install>0){total+=install;rows+=`<div class="brow"><span class="label">Install</span><span class="val">${fmt(install)}</span></div>`;}
+  if(productTotal>0){
+    total+=productTotal;
+    rows+=`<div class="brow"><span class="label">Additional products</span><span class="val">${fmt(productTotal)}</span></div>`;
+  }
   rows+=`<div class="total-row"><span class="label">Total</span><span class="val">${fmt(total)}</span></div>`;
   document.getElementById('breakdown-body').innerHTML=rows;
-  lastTotal=total;lastSnapshot={colour,handrail,install,railCode,height,linFt,postSize,postQty,spType,spQty,total};
+  lastTotal=total;
+  const prodSnap={gateAddon:parseFloat(document.getElementById('p-gate-addon').value)||0,scGate:parseFloat(document.getElementById('p-sc-gate').value)||0,regGate:parseFloat(document.getElementById('p-reg-gate').value)||0,stair:parseFloat(document.getElementById('p-stair').value)||0,ballcaps:parseFloat(document.getElementById('p-ballcaps').value)||0,pegleg:parseFloat(document.getElementById('p-pegleg').value)||0,colSize:document.getElementById('p-col-size').value,colQty:parseFloat(document.getElementById('p-col-qty').value)||0};
+  lastSnapshot={colour,handrail,install,railCode,height,linFt,postSize,postQty,spType,spQty,total,products:prodSnap};
 }
 
 function saveQuote(){
@@ -531,6 +645,17 @@ function loadQuoteForEdit(id){
     document.getElementById('clear-photo-btn').style.display='inline-flex';
   }
 
+  // Restore product fields
+  if(q.products){
+    const p=q.products;
+    if(p.gateAddon)document.getElementById('p-gate-addon').value=p.gateAddon;
+    if(p.scGate)document.getElementById('p-sc-gate').value=p.scGate;
+    if(p.regGate)document.getElementById('p-reg-gate').value=p.regGate;
+    if(p.stair)document.getElementById('p-stair').value=p.stair;
+    if(p.pegleg)document.getElementById('p-pegleg').value=p.pegleg;
+    if(p.colSize)document.getElementById('p-col-size').value=p.colSize;
+    if(p.colQty)document.getElementById('p-col-qty').value=p.colQty;
+  }
   // Update save button to show "Update quote"
   document.getElementById('save-btn').textContent='Update quote';
   document.getElementById('editing-banner').style.display='flex';
@@ -585,8 +710,8 @@ function resetAll(){
   editingId=null;
   document.getElementById('save-btn').textContent='Save quote';
   document.getElementById('editing-banner').style.display='none';
-  ['colour','handrail','railing-type','railing-height','post-size','spindle-type'].forEach(id=>document.getElementById(id).selectedIndex=0);
-  ['install-cost','linear-ft','post-qty','spindle-qty'].forEach(id=>{document.getElementById(id).value='';document.getElementById(id).classList.remove('ai-filled');});
+  ['colour','handrail','railing-type','railing-height','post-size','spindle-type','p-col-size'].forEach(id=>document.getElementById(id).selectedIndex=0);
+  ['install-cost','linear-ft','post-qty','spindle-qty','p-gate-addon','p-sc-gate','p-reg-gate','p-stair','p-ballcaps','p-pegleg','p-col-qty'].forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.classList.remove('ai-filled');}});
   clearPhoto();calc();
 }
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
