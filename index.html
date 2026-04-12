@@ -54,11 +54,15 @@
   .hbadge-36{background:#DEEAF1;color:#0C447C}.hbadge-42{background:#D9EAD3;color:#27500A}
   .cdot{display:inline-block;width:9px;height:9px;border-radius:50%;border:1px solid var(--grey-200);margin-right:5px;vertical-align:middle}
   .btn-row{display:flex;justify-content:flex-end;gap:.5rem;margin-top:1rem}
-  .btn{height:40px;padding:0 1.25rem;border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:.875rem;font-weight:500;cursor:pointer;transition:all .15s;letter-spacing:.02em}
+  .btn{height:40px;padding:0 1.25rem;border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:.875rem;font-weight:500;cursor:pointer;transition:all .15s;letter-spacing:.02em;border:none}
   .btn-ghost{background:transparent;border:1px solid var(--grey-200);color:var(--grey-600)}
   .btn-ghost:hover{border-color:var(--grey-400);color:var(--black)}
   .btn-primary{background:var(--black);border:1px solid var(--black);color:var(--white)}
   .btn-primary:hover{background:#2a2a2a}
+  .btn-accent{background:var(--accent);border:1px solid var(--accent-dark);color:var(--black);font-weight:500}
+  .btn-accent:hover{background:var(--accent-dark);color:var(--white)}
+
+  /* Scan zone */
   .scan-zone{border:1.5px dashed var(--grey-200);border-radius:var(--radius-lg);padding:1.5rem;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;margin-bottom:.75rem;position:relative}
   .scan-zone:hover{border-color:var(--accent);background:#fffbf4}
   .scan-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
@@ -70,11 +74,32 @@
   .scan-status.loading{color:var(--accent-dark)}
   .scan-status.success{color:var(--success);font-weight:500}
   .scan-status.error{color:var(--danger)}
-  .ai-note{font-size:.75rem;color:var(--grey-400);margin-top:.5rem;font-style:italic}
+
+  /* Confirm panel */
+  .confirm-panel{display:none;margin-top:1rem;border:1.5px solid var(--accent);border-radius:var(--radius-lg);overflow:hidden}
+  .confirm-panel.show{display:block}
+  .confirm-header{background:#fffbf4;padding:.75rem 1rem;border-bottom:1px solid var(--grey-100);display:flex;align-items:center;justify-content:space-between}
+  .confirm-title{font-size:.8rem;font-weight:500;color:var(--accent-dark);letter-spacing:.05em;text-transform:uppercase}
+  .confirm-body{padding:1rem}
+  .confirm-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem;margin-bottom:1rem}
+  @media(max-width:400px){.confirm-grid{grid-template-columns:1fr}}
+  .confirm-field{display:flex;flex-direction:column;gap:.3rem}
+  .confirm-field label{font-size:.72rem;font-weight:500;color:var(--grey-600);letter-spacing:.03em}
+  .confirm-field input{height:38px;padding:0 .75rem;border:1px solid var(--grey-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:.9rem;color:var(--black);background:var(--white)}
+  .confirm-field input:focus{outline:none;border-color:var(--accent)}
+  .confirm-field input.changed{border-color:var(--accent);background:#fffbf4}
+  .confirm-note{font-size:.75rem;color:var(--grey-400);margin-bottom:.875rem;font-style:italic}
+  .sections-list{font-size:.8rem;color:var(--grey-400);margin-bottom:.875rem}
+  .sections-list span{font-weight:500;color:var(--grey-600)}
+  .confirm-actions{display:flex;gap:.5rem;justify-content:flex-end}
+
+  /* Tabs */
   .tabs{display:flex;margin-bottom:1.5rem;border-bottom:1px solid var(--grey-100)}
   .tab-btn{padding:.625rem 1.25rem;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:500;background:none;border:none;cursor:pointer;color:var(--grey-400);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
   .tab-btn.active{color:var(--black);border-bottom-color:var(--accent)}
   .tab-pane{display:none}.tab-pane.active{display:block}
+
+  /* Saved */
   .saved-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
   .saved-count{font-size:.75rem;color:var(--grey-400);background:var(--grey-50);border:1px solid var(--grey-100);padding:2px 10px;border-radius:20px}
   .quote-item{border:1px solid var(--grey-100);border-radius:var(--radius);padding:.875rem 1rem;margin-bottom:.5rem;display:flex;justify-content:space-between;align-items:center;gap:.75rem;background:var(--white)}
@@ -103,20 +128,58 @@
   </div>
 
   <div class="tab-pane active" id="tab-calculator">
+
+    <!-- Scan card -->
     <div class="card">
       <p class="sec-label">Scan site sketch</p>
       <div class="scan-zone" id="scan-zone">
         <input type="file" accept="image/*" capture="environment" id="photo-input" onchange="handlePhoto(event)">
         <div class="scan-icon">&#128247;</div>
         <div class="scan-label">Take a photo or upload a sketch</div>
-        <div class="scan-sub">The app will read measurements and fill the form automatically</div>
+        <div class="scan-sub">App reads measurements and fills the form automatically</div>
         <img class="scan-preview" id="scan-preview" alt="Sketch preview">
         <div class="scan-status" id="scan-status"></div>
       </div>
-      <div class="ai-note" id="ai-note" style="display:none">&#10003; Fields highlighted in gold were filled by AI — please review before saving.</div>
-      <button class="btn btn-ghost" id="clear-photo-btn" style="display:none;margin-top:.5rem" onclick="clearPhoto()">Clear photo</button>
+
+      <!-- Confirm / edit panel -->
+      <div class="confirm-panel" id="confirm-panel">
+        <div class="confirm-header">
+          <span class="confirm-title">Review AI readings — correct if needed</span>
+        </div>
+        <div class="confirm-body">
+          <div class="sections-list" id="sections-list"></div>
+          <div class="confirm-grid">
+            <div class="confirm-field">
+              <label>Total linear feet</label>
+              <input type="number" id="c-linear-ft" min="0" placeholder="0" oninput="markChanged(this)">
+            </div>
+            <div class="confirm-field">
+              <label>Number of posts</label>
+              <input type="number" id="c-post-count" min="0" placeholder="0" oninput="markChanged(this)">
+            </div>
+            <div class="confirm-field">
+              <label>Number of sections</label>
+              <input type="number" id="c-section-count" min="0" placeholder="0" oninput="recalcSpindles()">
+            </div>
+            <div class="confirm-field">
+              <label>Spindles (2 per section)</label>
+              <input type="number" id="c-spindle-count" min="0" placeholder="0" oninput="markChanged(this)">
+            </div>
+          </div>
+          <div class="confirm-note">Gold border = AI filled. Edit any value before applying.</div>
+          <div class="confirm-actions">
+            <button class="btn btn-ghost" onclick="dismissConfirm()">Cancel</button>
+            <button class="btn btn-accent" onclick="applyConfirm()">Apply to form</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:.5rem;margin-top:.75rem">
+        <button class="btn btn-ghost" id="clear-photo-btn" style="display:none" onclick="clearPhoto()">Clear photo</button>
+      </div>
     </div>
 
+    <!-- Railing / Posts / Spindles -->
     <div class="card">
       <p class="sec-label">Railing</p>
       <div class="grid grid-3">
@@ -156,6 +219,7 @@
       </div>
     </div>
 
+    <!-- Job details -->
     <div class="card">
       <p class="sec-label">Job details</p>
       <div class="grid grid-3">
@@ -180,6 +244,7 @@
       </div>
     </div>
 
+    <!-- Breakdown -->
     <div class="card">
       <p class="sec-label">Quote breakdown</p>
       <div id="breakdown-body"><div class="breakdown-empty">Fill in the fields above to generate a quote.</div></div>
@@ -190,6 +255,7 @@
     </div>
   </div>
 
+  <!-- Saved tab -->
   <div class="tab-pane" id="tab-saved">
     <div class="card">
       <div class="saved-header">
@@ -256,18 +322,18 @@ function calc(){
   lastTotal=total;lastSnapshot={colour,handrail,install,railCode,height,linFt,postSize,postQty,spType,spQty,total};
 }
 
+/* ── Photo scanning ── */
 async function handlePhoto(event){
   const file=event.target.files[0];if(!file)return;
   const preview=document.getElementById('scan-preview');
   const status=document.getElementById('scan-status');
-  const note=document.getElementById('ai-note');
-  const clearBtn=document.getElementById('clear-photo-btn');
   const reader=new FileReader();
   reader.onload=async(e)=>{
     const base64=e.target.result.split(',')[1];
     const mediaType=file.type||'image/jpeg';
     preview.src=e.target.result;preview.style.display='block';
-    clearBtn.style.display='inline-flex';note.style.display='none';
+    document.getElementById('clear-photo-btn').style.display='inline-flex';
+    document.getElementById('confirm-panel').classList.remove('show');
     status.className='scan-status loading';status.textContent='Reading your sketch...';
     try{
       const res=await fetch('/api/scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({base64,mediaType})});
@@ -275,17 +341,68 @@ async function handlePhoto(event){
       if(data.error)throw new Error(data.error.message||data.error);
       const text=data.content[0].text.trim();
       const parsed=JSON.parse(text.replace(/```json|```/g,'').trim());
-      let filled=0;
-      if(parsed.linear_feet){const el=document.getElementById('linear-ft');el.value=parsed.linear_feet;el.classList.add('ai-filled');filled++;}
-      if(parsed.post_count){const el=document.getElementById('post-qty');el.value=parsed.post_count;el.classList.add('ai-filled');filled++;}
-      if(parsed.spindle_count){const el=document.getElementById('spindle-qty');el.value=parsed.spindle_count;el.classList.add('ai-filled');filled++;}
-      if(parsed.height_inches===36||parsed.height_inches===42){document.getElementById('railing-height').value=String(parsed.height_inches);filled++;}
-      if(filled>0){status.className='scan-status success';status.textContent=parsed.notes?`Read: ${parsed.notes}`:`${filled} field${filled>1?'s':''} filled from sketch.`;note.style.display='block';}
-      else{status.className='scan-status error';status.textContent="Couldn't read measurements. Please fill in manually.";}
-      calc();
-    }catch(err){status.className='scan-status error';status.textContent='Error: '+err.message;}
+      showConfirm(parsed);
+      status.className='scan-status success';
+      status.textContent='Sketch read — review and confirm the values below.';
+    }catch(err){
+      status.className='scan-status error';
+      status.textContent='Error: '+err.message;
+    }
   };
   reader.readAsDataURL(file);
+}
+
+function showConfirm(parsed){
+  const panel=document.getElementById('confirm-panel');
+  const secList=document.getElementById('sections-list');
+
+  if(parsed.sections&&parsed.sections.length>0){
+    secList.innerHTML=`Sections read: <span>${parsed.sections.join(' ft + ')} ft = ${parsed.linear_feet} ft total</span>`;
+  } else {
+    secList.innerHTML='';
+  }
+
+  setConfirmField('c-linear-ft', parsed.linear_feet);
+  setConfirmField('c-post-count', parsed.post_count);
+  setConfirmField('c-section-count', parsed.section_count);
+  setConfirmField('c-spindle-count', parsed.spindle_count);
+
+  panel.classList.add('show');
+}
+
+function setConfirmField(id, val){
+  const el=document.getElementById(id);
+  el.value=val!==null&&val!==undefined?val:'';
+  if(val!==null&&val!==undefined)el.classList.add('changed');
+  else el.classList.remove('changed');
+}
+
+function markChanged(el){ el.classList.add('changed'); }
+
+function recalcSpindles(){
+  const sections=parseFloat(document.getElementById('c-section-count').value)||0;
+  const spEl=document.getElementById('c-spindle-count');
+  spEl.value=sections*2;
+  spEl.classList.add('changed');
+  markChanged(document.getElementById('c-section-count'));
+}
+
+function applyConfirm(){
+  const linFt=document.getElementById('c-linear-ft').value;
+  const postQty=document.getElementById('c-post-count').value;
+  const spQty=document.getElementById('c-spindle-count').value;
+
+  if(linFt){ const el=document.getElementById('linear-ft');el.value=linFt;el.classList.add('ai-filled'); }
+  if(postQty){ const el=document.getElementById('post-qty');el.value=postQty;el.classList.add('ai-filled'); }
+  if(spQty){ const el=document.getElementById('spindle-qty');el.value=spQty;el.classList.add('ai-filled'); }
+
+  document.getElementById('confirm-panel').classList.remove('show');
+  calc();
+  showToast('Values applied to form.');
+}
+
+function dismissConfirm(){
+  document.getElementById('confirm-panel').classList.remove('show');
 }
 
 function clearPhoto(){
@@ -294,11 +411,12 @@ function clearPhoto(){
   document.getElementById('scan-preview').src='';
   document.getElementById('scan-status').textContent='';
   document.getElementById('scan-status').className='scan-status';
-  document.getElementById('ai-note').style.display='none';
   document.getElementById('clear-photo-btn').style.display='none';
+  document.getElementById('confirm-panel').classList.remove('show');
   ['linear-ft','post-qty','spindle-qty'].forEach(id=>document.getElementById(id).classList.remove('ai-filled'));
 }
 
+/* ── Save / render ── */
 function saveQuote(){
   if(!lastSnapshot||lastTotal===0){showToast('Nothing to save yet.');return;}
   const name=prompt('Label this quote (e.g. customer name or address):');
@@ -307,9 +425,7 @@ function saveQuote(){
   savedQuotes.unshift(quote);localStorage.setItem('tycon_quotes',JSON.stringify(savedQuotes));
   renderSaved();showToast('Quote saved!');
 }
-
 function deleteQuote(id){savedQuotes=savedQuotes.filter(q=>q.id!==id);localStorage.setItem('tycon_quotes',JSON.stringify(savedQuotes));renderSaved();}
-
 function renderSaved(){
   const list=document.getElementById('saved-list');
   const count=document.getElementById('saved-count');
@@ -324,22 +440,18 @@ function renderSaved(){
     return `<div class="quote-item"><div class="qi-left"><div class="qi-name">${q.name}</div><div class="qi-meta">${q.date} &nbsp;&middot;&nbsp; ${parts.join(' &nbsp;&middot;&nbsp; ')}</div></div><div class="qi-total">${fmt(q.total)}</div><button class="qi-del" onclick="deleteQuote(${q.id})" title="Delete">&times;</button></div>`;
   }).join('');
 }
-
 function switchTab(id,btn){
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
   btn.classList.add('active');document.getElementById('tab-'+id).classList.add('active');
   if(id==='saved')renderSaved();
 }
-
 function resetAll(){
   ['colour','handrail','railing-type','railing-height','post-size','spindle-type'].forEach(id=>document.getElementById(id).selectedIndex=0);
   ['install-cost','linear-ft','post-qty','spindle-qty'].forEach(id=>{document.getElementById(id).value='';document.getElementById(id).classList.remove('ai-filled');});
   clearPhoto();calc();
 }
-
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
-
 renderSaved();
 </script>
 </body>
