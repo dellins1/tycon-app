@@ -8,17 +8,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Serif+Display&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --black:#0f0f0f;--white:#fafaf8;--grey-50:#f5f5f3;--grey-100:#e8e8e4;
-    --grey-200:#d0d0ca;--grey-400:#9a9a92;--grey-600:#5c5c56;
-    --accent:#c8a96e;--accent-dark:#a8893e;--danger:#c0392b;--success:#27500A;
-    --radius:4px;--radius-lg:8px;
-  }
+  :root{--black:#0f0f0f;--white:#fafaf8;--grey-50:#f5f5f3;--grey-100:#e8e8e4;--grey-200:#d0d0ca;--grey-400:#9a9a92;--grey-600:#5c5c56;--accent:#c8a96e;--accent-dark:#a8893e;--danger:#c0392b;--success:#27500A;--radius:4px;--radius-lg:8px;}
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   body{font-family:'DM Sans',sans-serif;background:var(--grey-50);color:var(--black);min-height:100vh}
   header{background:var(--black);color:var(--white);padding:0 2rem;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;border-bottom:1px solid #222}
-  .logo{font-family:'DM Serif Display',serif;font-size:1.25rem;color:var(--white)}
-  .logo span{color:var(--accent)}
+  .logo{font-family:'DM Serif Display',serif;font-size:1.25rem;color:var(--white)}.logo span{color:var(--accent)}
   .header-tag{font-size:.75rem;color:var(--grey-400);letter-spacing:.08em;text-transform:uppercase}
   .container{max-width:760px;margin:0 auto;padding:2rem 1.5rem 4rem}
   .page-title{font-family:'DM Serif Display',serif;font-size:1.75rem;font-weight:400;margin-bottom:.25rem}
@@ -26,8 +20,7 @@
   .card{background:var(--white);border:1px solid var(--grey-100);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1rem}
   .sec-label{font-size:.7rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--grey-400);margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid var(--grey-100)}
   .divider{height:1px;background:var(--grey-100);margin:1.25rem 0}
-  .grid{display:grid;gap:.875rem}
-  .grid-3{grid-template-columns:repeat(3,1fr)}
+  .grid{display:grid;gap:.875rem}.grid-3{grid-template-columns:repeat(3,1fr)}
   @media(max-width:540px){.grid-3{grid-template-columns:repeat(2,1fr)}}
   .fgroup{display:flex;flex-direction:column;gap:.375rem}
   .fgroup label{font-size:.75rem;font-weight:500;color:var(--grey-600);letter-spacing:.03em}
@@ -39,15 +32,10 @@
   .brow{display:flex;justify-content:space-between;align-items:baseline;padding:.5rem 0;font-size:.9rem;border-bottom:1px solid var(--grey-50)}
   .brow:last-of-type{border-bottom:none}
   .brow .label{color:var(--grey-600)}.brow .val{font-weight:500;color:var(--black)}
-  .brow.sub{padding:.15rem 0 .15rem 1rem}
-  .brow.sub .label{font-size:.78rem;color:var(--grey-400)}
-  .brow.sub .val{font-size:.78rem;font-weight:400;color:var(--grey-400)}
-  .brow.info .label{color:var(--grey-400);font-size:.82rem}
-  .brow.info .val{font-size:.82rem;font-weight:400;color:var(--grey-600)}
-  .brow.info{padding:.3rem 0}
+  .brow.sub{padding:.15rem 0 .15rem 1rem}.brow.sub .label{font-size:.78rem;color:var(--grey-400)}.brow.sub .val{font-size:.78rem;font-weight:400;color:var(--grey-400)}
+  .brow.info{padding:.3rem 0}.brow.info .label{color:var(--grey-400);font-size:.82rem}.brow.info .val{font-size:.82rem;font-weight:400;color:var(--grey-600)}
   .total-row{display:flex;justify-content:space-between;align-items:baseline;padding:1rem 0 0;margin-top:.5rem;border-top:2px solid var(--black)}
-  .total-row .label{font-size:1rem;font-weight:500}
-  .total-row .val{font-size:1.4rem;font-weight:500;font-family:'DM Serif Display',serif}
+  .total-row .label{font-size:1rem;font-weight:500}.total-row .val{font-size:1.4rem;font-weight:500;font-family:'DM Serif Display',serif}
   .info-divider{height:1px;background:var(--grey-100);margin:.75rem 0}
   .breakdown-empty{text-align:center;padding:2rem;color:var(--grey-400);font-size:.875rem}
   .hbadge{display:inline-block;font-size:.68rem;font-weight:500;padding:1px 7px;border-radius:20px;margin-left:6px;vertical-align:middle}
@@ -55,43 +43,56 @@
   .cdot{display:inline-block;width:9px;height:9px;border-radius:50%;border:1px solid var(--grey-200);margin-right:5px;vertical-align:middle}
   .btn-row{display:flex;justify-content:flex-end;gap:.5rem;margin-top:1rem}
   .btn{height:40px;padding:0 1.25rem;border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:.875rem;font-weight:500;cursor:pointer;transition:all .15s;letter-spacing:.02em;border:none}
-  .btn-ghost{background:transparent;border:1px solid var(--grey-200);color:var(--grey-600)}
-  .btn-ghost:hover{border-color:var(--grey-400);color:var(--black)}
-  .btn-primary{background:var(--black);border:1px solid var(--black);color:var(--white)}
-  .btn-primary:hover{background:#2a2a2a}
-  .btn-accent{background:var(--accent);border:1px solid var(--accent-dark);color:var(--black);font-weight:500}
-  .btn-accent:hover{background:var(--accent-dark);color:var(--white)}
+  .btn-ghost{background:transparent;border:1px solid var(--grey-200);color:var(--grey-600)}.btn-ghost:hover{border-color:var(--grey-400);color:var(--black)}
+  .btn-primary{background:var(--black);border:1px solid var(--black);color:var(--white)}.btn-primary:hover{background:#2a2a2a}
+  .btn-accent{background:var(--accent);border:1px solid var(--accent-dark);color:var(--black);font-weight:500}.btn-accent:hover{background:var(--accent-dark);color:var(--white)}
+  .btn-danger{background:transparent;border:1px solid #f7c1c1;color:var(--danger)}.btn-danger:hover{background:#fcebeb}
+  .btn-sm{height:32px;padding:0 .875rem;font-size:.8rem}
 
-  /* Scan zone */
+  /* Scan */
   .scan-zone{border:1.5px dashed var(--grey-200);border-radius:var(--radius-lg);padding:1.5rem;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;margin-bottom:.75rem;position:relative}
   .scan-zone:hover{border-color:var(--accent);background:#fffbf4}
   .scan-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
   .scan-icon{font-size:1.75rem;margin-bottom:.5rem}
   .scan-label{font-size:.9rem;font-weight:500;color:var(--grey-600)}
   .scan-sub{font-size:.78rem;color:var(--grey-400);margin-top:.25rem}
-  .scan-preview{max-width:100%;max-height:180px;border-radius:var(--radius);margin-top:1rem;display:none;object-fit:contain;border:1px solid var(--grey-100)}
+  .scan-preview{max-width:100%;max-height:160px;border-radius:var(--radius);margin-top:1rem;display:none;object-fit:contain;border:1px solid var(--grey-100)}
   .scan-status{margin-top:.75rem;font-size:.85rem}
-  .scan-status.loading{color:var(--accent-dark)}
-  .scan-status.success{color:var(--success);font-weight:500}
-  .scan-status.error{color:var(--danger)}
+  .scan-status.loading{color:var(--accent-dark)}.scan-status.success{color:var(--success);font-weight:500}.scan-status.error{color:var(--danger)}
 
-  /* Confirm panel */
-  .confirm-panel{display:none;margin-top:1rem;border:1.5px solid var(--accent);border-radius:var(--radius-lg);overflow:hidden}
-  .confirm-panel.show{display:block}
-  .confirm-header{background:#fffbf4;padding:.75rem 1rem;border-bottom:1px solid var(--grey-100);display:flex;align-items:center;justify-content:space-between}
-  .confirm-title{font-size:.8rem;font-weight:500;color:var(--accent-dark);letter-spacing:.05em;text-transform:uppercase}
-  .confirm-body{padding:1rem}
-  .confirm-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem;margin-bottom:1rem}
-  @media(max-width:400px){.confirm-grid{grid-template-columns:1fr}}
-  .confirm-field{display:flex;flex-direction:column;gap:.3rem}
-  .confirm-field label{font-size:.72rem;font-weight:500;color:var(--grey-600);letter-spacing:.03em}
-  .confirm-field input{height:38px;padding:0 .75rem;border:1px solid var(--grey-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:.9rem;color:var(--black);background:var(--white)}
-  .confirm-field input:focus{outline:none;border-color:var(--accent)}
-  .confirm-field input.changed{border-color:var(--accent);background:#fffbf4}
-  .confirm-note{font-size:.75rem;color:var(--grey-400);margin-bottom:.875rem;font-style:italic}
-  .sections-list{font-size:.8rem;color:var(--grey-400);margin-bottom:.875rem}
-  .sections-list span{font-weight:500;color:var(--grey-600)}
-  .confirm-actions{display:flex;gap:.5rem;justify-content:flex-end}
+  /* Section editor */
+  .section-panel{display:none;margin-top:1rem;border:1.5px solid var(--accent);border-radius:var(--radius-lg);overflow:hidden}
+  .section-panel.show{display:block}
+  .section-panel-header{background:#fffbf4;padding:.75rem 1rem;border-bottom:1px solid var(--grey-100)}
+  .section-panel-title{font-size:.8rem;font-weight:500;color:var(--accent-dark);letter-spacing:.05em;text-transform:uppercase;margin-bottom:.15rem}
+  .section-panel-sub{font-size:.75rem;color:var(--grey-400)}
+  .section-panel-body{padding:1rem}
+
+  /* Posts row */
+  .posts-row{display:flex;align-items:center;gap:.75rem;margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--grey-100)}
+  .posts-row label{font-size:.8rem;font-weight:500;color:var(--grey-600);white-space:nowrap}
+  .posts-row input{width:80px;height:36px;padding:0 .5rem;border:1px solid var(--grey-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:.9rem;color:var(--black);text-align:center}
+  .posts-row input:focus{outline:none;border-color:var(--accent)}
+
+  /* Section rows */
+  .sections-title{font-size:.75rem;font-weight:500;color:var(--grey-600);letter-spacing:.04em;text-transform:uppercase;margin-bottom:.625rem}
+  .section-row{display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem}
+  .section-num{font-size:.78rem;color:var(--grey-400);min-width:20px;text-align:right}
+  .section-input{flex:1;height:36px;padding:0 .75rem;border:1px solid var(--grey-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:.9rem;color:var(--black);background:var(--white)}
+  .section-input:focus{outline:none;border-color:var(--accent)}
+  .section-input.ai{border-color:var(--accent);background:#fffbf4}
+  .section-unit{font-size:.82rem;color:var(--grey-400);white-space:nowrap}
+  .section-del{background:none;border:none;cursor:pointer;color:var(--grey-300);font-size:1.1rem;padding:4px;line-height:1;transition:color .15s;color:var(--grey-200)}
+  .section-del:hover{color:var(--danger)}
+
+  .add-section-btn{display:flex;align-items:center;gap:.4rem;background:none;border:1px dashed var(--grey-200);border-radius:var(--radius);padding:.4rem .875rem;font-family:'DM Sans',sans-serif;font-size:.82rem;color:var(--grey-400);cursor:pointer;width:100%;margin-top:.25rem;transition:all .15s}
+  .add-section-btn:hover{border-color:var(--accent);color:var(--accent-dark)}
+
+  .section-summary{display:flex;justify-content:space-between;align-items:baseline;padding:.75rem 0 0;margin-top:.5rem;border-top:1px solid var(--grey-100);font-size:.85rem}
+  .section-summary .s-label{color:var(--grey-400)}
+  .section-summary .s-val{font-weight:500;color:var(--black)}
+
+  .section-actions{display:flex;gap:.5rem;justify-content:flex-end;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--grey-100)}
 
   /* Tabs */
   .tabs{display:flex;margin-bottom:1.5rem;border-bottom:1px solid var(--grey-100)}
@@ -103,12 +104,10 @@
   .saved-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
   .saved-count{font-size:.75rem;color:var(--grey-400);background:var(--grey-50);border:1px solid var(--grey-100);padding:2px 10px;border-radius:20px}
   .quote-item{border:1px solid var(--grey-100);border-radius:var(--radius);padding:.875rem 1rem;margin-bottom:.5rem;display:flex;justify-content:space-between;align-items:center;gap:.75rem;background:var(--white)}
-  .qi-left{flex:1;min-width:0}
-  .qi-name{font-size:.9rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .qi-left{flex:1;min-width:0}.qi-name{font-size:.9rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .qi-meta{font-size:.78rem;color:var(--grey-400);margin-top:2px}
   .qi-total{font-size:1rem;font-weight:500;font-family:'DM Serif Display',serif;white-space:nowrap}
-  .qi-del{background:none;border:none;cursor:pointer;color:var(--grey-400);font-size:1.1rem;padding:4px;line-height:1;transition:color .15s}
-  .qi-del:hover{color:var(--danger)}
+  .qi-del{background:none;border:none;cursor:pointer;color:var(--grey-400);font-size:1.1rem;padding:4px;line-height:1;transition:color .15s}.qi-del:hover{color:var(--danger)}
   .no-quotes{text-align:center;padding:1.5rem;color:var(--grey-400);font-size:.875rem}
   .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--black);color:var(--white);padding:.75rem 1.25rem;border-radius:var(--radius-lg);font-size:.85rem;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;z-index:999}
   .toast.show{opacity:1;transform:translateY(0)}
@@ -129,57 +128,55 @@
 
   <div class="tab-pane active" id="tab-calculator">
 
-    <!-- Scan card -->
     <div class="card">
       <p class="sec-label">Scan site sketch</p>
       <div class="scan-zone" id="scan-zone">
         <input type="file" accept="image/*" capture="environment" id="photo-input" onchange="handlePhoto(event)">
         <div class="scan-icon">&#128247;</div>
         <div class="scan-label">Take a photo or upload a sketch</div>
-        <div class="scan-sub">App reads measurements and fills the form automatically</div>
+        <div class="scan-sub">App reads measurements — you confirm each section before applying</div>
         <img class="scan-preview" id="scan-preview" alt="Sketch preview">
         <div class="scan-status" id="scan-status"></div>
       </div>
 
-      <!-- Confirm / edit panel -->
-      <div class="confirm-panel" id="confirm-panel">
-        <div class="confirm-header">
-          <span class="confirm-title">Review AI readings — correct if needed</span>
+      <!-- Section-by-section confirm panel -->
+      <div class="section-panel" id="section-panel">
+        <div class="section-panel-header">
+          <div class="section-panel-title">Confirm railing sections</div>
+          <div class="section-panel-sub">Edit any section length, add missing ones, or remove incorrect ones</div>
         </div>
-        <div class="confirm-body">
-          <div class="sections-list" id="sections-list"></div>
-          <div class="confirm-grid">
-            <div class="confirm-field">
-              <label>Total linear feet</label>
-              <input type="number" id="c-linear-ft" min="0" placeholder="0" oninput="markChanged(this)">
-            </div>
-            <div class="confirm-field">
-              <label>Number of posts</label>
-              <input type="number" id="c-post-count" min="0" placeholder="0" oninput="markChanged(this)">
-            </div>
-            <div class="confirm-field">
-              <label>Number of sections</label>
-              <input type="number" id="c-section-count" min="0" placeholder="0" oninput="recalcSpindles()">
-            </div>
-            <div class="confirm-field">
-              <label>Spindles (2 per section)</label>
-              <input type="number" id="c-spindle-count" min="0" placeholder="0" oninput="markChanged(this)">
-            </div>
+        <div class="section-panel-body">
+
+          <div class="posts-row">
+            <label>Number of posts</label>
+            <input type="number" id="s-posts" min="0" placeholder="0">
           </div>
-          <div class="confirm-note">Gold border = AI filled. Edit any value before applying.</div>
-          <div class="confirm-actions">
-            <button class="btn btn-ghost" onclick="dismissConfirm()">Cancel</button>
-            <button class="btn btn-accent" onclick="applyConfirm()">Apply to form</button>
+
+          <div class="sections-title">Railing sections</div>
+          <div id="sections-container"></div>
+          <button class="add-section-btn" onclick="addSection(null)">+ Add section</button>
+
+          <div class="section-summary">
+            <span class="s-label">Total linear ft</span>
+            <span class="s-val" id="s-total">0 ft</span>
+          </div>
+          <div class="section-summary" style="padding-top:.25rem;border-top:none">
+            <span class="s-label">Spindles (2 per section)</span>
+            <span class="s-val" id="s-spindles">0</span>
+          </div>
+
+          <div class="section-actions">
+            <button class="btn btn-ghost" onclick="dismissPanel()">Cancel</button>
+            <button class="btn btn-accent" onclick="applysections()">Apply to form</button>
           </div>
         </div>
       </div>
 
-      <div style="display:flex;gap:.5rem;margin-top:.75rem">
+      <div style="margin-top:.75rem">
         <button class="btn btn-ghost" id="clear-photo-btn" style="display:none" onclick="clearPhoto()">Clear photo</button>
       </div>
     </div>
 
-    <!-- Railing / Posts / Spindles -->
     <div class="card">
       <p class="sec-label">Railing</p>
       <div class="grid grid-3">
@@ -219,7 +216,6 @@
       </div>
     </div>
 
-    <!-- Job details -->
     <div class="card">
       <p class="sec-label">Job details</p>
       <div class="grid grid-3">
@@ -244,7 +240,6 @@
       </div>
     </div>
 
-    <!-- Breakdown -->
     <div class="card">
       <p class="sec-label">Quote breakdown</p>
       <div id="breakdown-body"><div class="breakdown-empty">Fill in the fields above to generate a quote.</div></div>
@@ -255,7 +250,6 @@
     </div>
   </div>
 
-  <!-- Saved tab -->
   <div class="tab-pane" id="tab-saved">
     <div class="card">
       <div class="saved-header">
@@ -289,12 +283,147 @@ const COLOUR_DOTS={"Black":"#1a1a1a","Pewter":"#8e8e8e","White":"#e8e8e4","Brown
 
 let savedQuotes=JSON.parse(localStorage.getItem('tycon_quotes')||'[]');
 let lastTotal=0,lastSnapshot=null;
+let sectionIdCounter=0;
 
 const rtSel=document.getElementById('railing-type');
 RAILINGS.forEach(r=>{const o=document.createElement('option');o.value=r.code;o.textContent=r.code;rtSel.appendChild(o);});
 
 function fmt(n){return'$'+Math.round(n).toLocaleString('en-CA')}
 
+/* ── Section panel ── */
+function addSection(val){
+  const container=document.getElementById('sections-container');
+  const id='sec-'+(sectionIdCounter++);
+  const row=document.createElement('div');
+  row.className='section-row';
+  row.id=id;
+  row.innerHTML=`
+    <span class="section-num">${container.children.length+1}</span>
+    <input type="number" class="section-input${val!==null?' ai':''}" min="0" step="0.5" placeholder="0" value="${val!==null&&val!==undefined?val:''}" oninput="updateSectionSummary()">
+    <span class="section-unit">ft</span>
+    <button class="section-del" onclick="removeSection('${id}')" title="Remove">&#215;</button>
+  `;
+  container.appendChild(row);
+  updateSectionNumbers();
+  updateSectionSummary();
+}
+
+function removeSection(id){
+  const el=document.getElementById(id);
+  if(el)el.remove();
+  updateSectionNumbers();
+  updateSectionSummary();
+}
+
+function updateSectionNumbers(){
+  const rows=document.querySelectorAll('#sections-container .section-row');
+  rows.forEach((r,i)=>{ r.querySelector('.section-num').textContent=i+1; });
+}
+
+function updateSectionSummary(){
+  const inputs=document.querySelectorAll('#sections-container .section-input');
+  let total=0,count=0;
+  inputs.forEach(inp=>{
+    const v=parseFloat(inp.value);
+    if(!isNaN(v)&&v>0){total+=v;count++;}
+  });
+  document.getElementById('s-total').textContent=total.toFixed(1)+' ft';
+  document.getElementById('s-spindles').textContent=(count*2);
+}
+
+function showSectionPanel(parsed){
+  const container=document.getElementById('sections-container');
+  container.innerHTML='';
+  sectionIdCounter=0;
+
+  document.getElementById('s-posts').value=parsed.post_count||'';
+
+  const sections=parsed.sections&&parsed.sections.length>0?parsed.sections:[];
+  if(sections.length>0){
+    sections.forEach(v=>addSection(v));
+  } else {
+    addSection(null);
+  }
+
+  document.getElementById('section-panel').classList.add('show');
+  updateSectionSummary();
+}
+
+function applysections(){
+  const inputs=document.querySelectorAll('#sections-container .section-input');
+  let total=0,count=0;
+  inputs.forEach(inp=>{
+    const v=parseFloat(inp.value);
+    if(!isNaN(v)&&v>0){total+=v;count++;}
+  });
+  const posts=document.getElementById('s-posts').value;
+
+  const lfEl=document.getElementById('linear-ft');
+  lfEl.value=Math.round(total*10)/10;
+  lfEl.classList.add('ai-filled');
+
+  if(posts){
+    const pEl=document.getElementById('post-qty');
+    pEl.value=posts;
+    pEl.classList.add('ai-filled');
+  }
+
+  const spEl=document.getElementById('spindle-qty');
+  spEl.value=count*2;
+  spEl.classList.add('ai-filled');
+
+  document.getElementById('section-panel').classList.remove('show');
+  calc();
+  showToast(`Applied — ${total.toFixed(1)} ft across ${count} section${count!==1?'s':''}, ${count*2} spindles.`);
+}
+
+function dismissPanel(){
+  document.getElementById('section-panel').classList.remove('show');
+}
+
+/* ── Photo handler ── */
+async function handlePhoto(event){
+  const file=event.target.files[0];if(!file)return;
+  const preview=document.getElementById('scan-preview');
+  const status=document.getElementById('scan-status');
+  const reader=new FileReader();
+  reader.onload=async(e)=>{
+    const base64=e.target.result.split(',')[1];
+    const mediaType=file.type||'image/jpeg';
+    preview.src=e.target.result;preview.style.display='block';
+    document.getElementById('clear-photo-btn').style.display='inline-flex';
+    document.getElementById('section-panel').classList.remove('show');
+    status.className='scan-status loading';status.textContent='Reading your sketch...';
+    try{
+      const res=await fetch('/api/scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({base64,mediaType})});
+      const data=await res.json();
+      if(data.error)throw new Error(data.error.message||data.error);
+      const text=data.content[0].text.trim();
+      const parsed=JSON.parse(text.replace(/```json|```/g,'').trim());
+      showSectionPanel(parsed);
+      const sc=parsed.sections?parsed.sections.length:0;
+      status.className='scan-status success';
+      status.textContent=`Found ${sc} section${sc!==1?'s':''} and ${parsed.post_count||'?'} posts — confirm below.`;
+    }catch(err){
+      status.className='scan-status error';
+      status.textContent='Error: '+err.message;
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearPhoto(){
+  document.getElementById('photo-input').value='';
+  document.getElementById('scan-preview').style.display='none';
+  document.getElementById('scan-preview').src='';
+  document.getElementById('scan-status').textContent='';
+  document.getElementById('scan-status').className='scan-status';
+  document.getElementById('clear-photo-btn').style.display='none';
+  document.getElementById('section-panel').classList.remove('show');
+  ['linear-ft','post-qty','spindle-qty'].forEach(id=>document.getElementById(id).classList.remove('ai-filled'));
+}
+
+/* ── Calculator ── */
 function calc(){
   const colour=document.getElementById('colour').value;
   const handrail=document.getElementById('handrail').value;
@@ -322,101 +451,6 @@ function calc(){
   lastTotal=total;lastSnapshot={colour,handrail,install,railCode,height,linFt,postSize,postQty,spType,spQty,total};
 }
 
-/* ── Photo scanning ── */
-async function handlePhoto(event){
-  const file=event.target.files[0];if(!file)return;
-  const preview=document.getElementById('scan-preview');
-  const status=document.getElementById('scan-status');
-  const reader=new FileReader();
-  reader.onload=async(e)=>{
-    const base64=e.target.result.split(',')[1];
-    const mediaType=file.type||'image/jpeg';
-    preview.src=e.target.result;preview.style.display='block';
-    document.getElementById('clear-photo-btn').style.display='inline-flex';
-    document.getElementById('confirm-panel').classList.remove('show');
-    status.className='scan-status loading';status.textContent='Reading your sketch...';
-    try{
-      const res=await fetch('/api/scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({base64,mediaType})});
-      const data=await res.json();
-      if(data.error)throw new Error(data.error.message||data.error);
-      const text=data.content[0].text.trim();
-      const parsed=JSON.parse(text.replace(/```json|```/g,'').trim());
-      showConfirm(parsed);
-      status.className='scan-status success';
-      status.textContent='Sketch read — review and confirm the values below.';
-    }catch(err){
-      status.className='scan-status error';
-      status.textContent='Error: '+err.message;
-    }
-  };
-  reader.readAsDataURL(file);
-}
-
-function showConfirm(parsed){
-  const panel=document.getElementById('confirm-panel');
-  const secList=document.getElementById('sections-list');
-
-  if(parsed.sections&&parsed.sections.length>0){
-    secList.innerHTML=`Sections read: <span>${parsed.sections.join(' ft + ')} ft = ${parsed.linear_feet} ft total</span>`;
-  } else {
-    secList.innerHTML='';
-  }
-
-  setConfirmField('c-linear-ft', parsed.linear_feet);
-  setConfirmField('c-post-count', parsed.post_count);
-  setConfirmField('c-section-count', parsed.section_count);
-  setConfirmField('c-spindle-count', parsed.spindle_count);
-
-  panel.classList.add('show');
-}
-
-function setConfirmField(id, val){
-  const el=document.getElementById(id);
-  el.value=val!==null&&val!==undefined?val:'';
-  if(val!==null&&val!==undefined)el.classList.add('changed');
-  else el.classList.remove('changed');
-}
-
-function markChanged(el){ el.classList.add('changed'); }
-
-function recalcSpindles(){
-  const sections=parseFloat(document.getElementById('c-section-count').value)||0;
-  const spEl=document.getElementById('c-spindle-count');
-  spEl.value=sections*2;
-  spEl.classList.add('changed');
-  markChanged(document.getElementById('c-section-count'));
-}
-
-function applyConfirm(){
-  const linFt=document.getElementById('c-linear-ft').value;
-  const postQty=document.getElementById('c-post-count').value;
-  const spQty=document.getElementById('c-spindle-count').value;
-
-  if(linFt){ const el=document.getElementById('linear-ft');el.value=linFt;el.classList.add('ai-filled'); }
-  if(postQty){ const el=document.getElementById('post-qty');el.value=postQty;el.classList.add('ai-filled'); }
-  if(spQty){ const el=document.getElementById('spindle-qty');el.value=spQty;el.classList.add('ai-filled'); }
-
-  document.getElementById('confirm-panel').classList.remove('show');
-  calc();
-  showToast('Values applied to form.');
-}
-
-function dismissConfirm(){
-  document.getElementById('confirm-panel').classList.remove('show');
-}
-
-function clearPhoto(){
-  document.getElementById('photo-input').value='';
-  document.getElementById('scan-preview').style.display='none';
-  document.getElementById('scan-preview').src='';
-  document.getElementById('scan-status').textContent='';
-  document.getElementById('scan-status').className='scan-status';
-  document.getElementById('clear-photo-btn').style.display='none';
-  document.getElementById('confirm-panel').classList.remove('show');
-  ['linear-ft','post-qty','spindle-qty'].forEach(id=>document.getElementById(id).classList.remove('ai-filled'));
-}
-
-/* ── Save / render ── */
 function saveQuote(){
   if(!lastSnapshot||lastTotal===0){showToast('Nothing to save yet.');return;}
   const name=prompt('Label this quote (e.g. customer name or address):');
@@ -451,7 +485,7 @@ function resetAll(){
   ['install-cost','linear-ft','post-qty','spindle-qty'].forEach(id=>{document.getElementById(id).value='';document.getElementById(id).classList.remove('ai-filled');});
   clearPhoto();calc();
 }
-function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
 renderSaved();
 </script>
 </body>
