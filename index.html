@@ -250,9 +250,13 @@
       <p class="sec-label">Quote breakdown</p>
       <div id="breakdown-body"><div class="breakdown-empty">Fill in the fields above to generate a quote.</div></div>
     </div>
+    <div id="editing-banner" style="display:none;align-items:center;justify-content:space-between;background:#fffbf4;border:1px solid var(--accent);border-radius:var(--radius-lg);padding:.75rem 1rem;margin-bottom:.75rem;font-size:.85rem;">
+      <span style="color:var(--accent-dark)">Editing: <strong id="editing-name"></strong></span>
+      <button class="btn btn-ghost btn-sm" onclick="cancelEdit()">Cancel edit</button>
+    </div>
     <div class="btn-row">
       <button class="btn btn-ghost" onclick="resetAll()">Clear</button>
-      <button class="btn btn-primary" onclick="saveQuote()">Save quote</button>
+      <button class="btn btn-primary" id="save-btn" onclick="saveQuote()">Save quote</button>
     </div>
   </div>
 
@@ -291,6 +295,7 @@ let savedQuotes=JSON.parse(localStorage.getItem('tycon_quotes')||'[]');
 let lastTotal=0,lastSnapshot=null;
 let sectionIdCounter=0;
 let currentPhotoDataUrl=null;
+let editingId=null;
 
 const rtSel=document.getElementById('railing-type');
 RAILINGS.forEach(r=>{const o=document.createElement('option');o.value=r.code;o.textContent=r.code;rtSel.appendChild(o);});
@@ -462,11 +467,8 @@ function calc(){
 
 function saveQuote(){
   if(!lastSnapshot||lastTotal===0){showToast('Nothing to save yet.');return;}
-  const name=prompt('Label this quote (e.g. customer name or address):');
-  if(!name)return;
-  let photoData=null;
-  if(currentPhotoDataUrl){
-    // Compress image before saving to keep storage small
+  let photoData=currentPhotoDataUrl||null;
+  if(currentPhotoDataUrl&&currentPhotoDataUrl.length>100000){
     const canvas=document.createElement('canvas');
     const img=new Image();
     img.src=currentPhotoDataUrl;
@@ -475,15 +477,78 @@ function saveQuote(){
     ctx.drawImage(img,0,0,canvas.width,canvas.height);
     photoData=canvas.toDataURL('image/jpeg',0.6);
   }
+  if(editingId!==null){
+    const idx=savedQuotes.findIndex(q=>q.id===editingId);
+    if(idx>-1){
+      const existing=savedQuotes[idx];
+      savedQuotes[idx]={...lastSnapshot,name:existing.name,date:existing.date,id:existing.id,photo:photoData||existing.photo};
+      localStorage.setItem('tycon_quotes',JSON.stringify(savedQuotes));
+      editingId=null;
+      document.getElementById('save-btn').textContent='Save quote';
+      document.getElementById('editing-banner').style.display='none';
+      renderSaved();showToast('Quote updated!');
+      return;
+    }
+  }
+  const name=prompt('Label this quote (e.g. customer name or address):');
+  if(!name)return;
   const quote={...lastSnapshot,name,date:new Date().toLocaleDateString('en-CA'),id:Date.now(),photo:photoData};
   savedQuotes.unshift(quote);localStorage.setItem('tycon_quotes',JSON.stringify(savedQuotes));
   renderSaved();showToast('Quote saved!');
 }
-function deleteQuote(id){savedQuotes=savedQuotes.filter(q=>q.id!==id);localStorage.setItem('tycon_quotes',JSON.stringify(savedQuotes));renderSaved();}
+function deleteQuote(id){
+  if(!confirm('Delete this quote?'))return;
+  savedQuotes=savedQuotes.filter(q=>q.id!==id);
+  localStorage.setItem('tycon_quotes',JSON.stringify(savedQuotes));
+  renderSaved();
+}
 function togglePhoto(id){
   const wrap=document.getElementById('wrap-'+id);
   if(wrap)wrap.classList.toggle('open');
 }
+function loadQuoteForEdit(id){
+  const q=savedQuotes.find(x=>x.id===id);
+  if(!q)return;
+  editingId=id;
+
+  // Populate all form fields
+  if(q.railCode)document.getElementById('railing-type').value=q.railCode;
+  document.getElementById('railing-height').value=q.height||'36';
+  document.getElementById('linear-ft').value=q.linFt||'';
+  document.getElementById('post-size').value=q.postSize||'2';
+  document.getElementById('post-qty').value=q.postQty||'';
+  document.getElementById('spindle-type').value=q.spType||'WALL-regular';
+  document.getElementById('spindle-qty').value=q.spQty||'';
+  document.getElementById('colour').value=q.colour||'Black';
+  document.getElementById('handrail').value=q.handrail||'Empress';
+  document.getElementById('install-cost').value=q.install||'';
+
+  // Load photo if saved
+  if(q.photo){
+    currentPhotoDataUrl=q.photo;
+    const preview=document.getElementById('scan-preview');
+    preview.src=q.photo;preview.style.display='block';
+    document.getElementById('clear-photo-btn').style.display='inline-flex';
+  }
+
+  // Update save button to show "Update quote"
+  document.getElementById('save-btn').textContent='Update quote';
+  document.getElementById('editing-banner').style.display='flex';
+  document.getElementById('editing-name').textContent=q.name;
+
+  switchTab('calculator',document.querySelector('.tab-btn'));
+  window.scrollTo({top:0,behavior:'smooth'});
+  calc();
+  showToast('Quote loaded — make your changes and tap Update quote.');
+}
+
+function cancelEdit(){
+  editingId=null;
+  document.getElementById('save-btn').textContent='Save quote';
+  document.getElementById('editing-banner').style.display='none';
+  resetAll();
+}
+
 function renderSaved(){
   const list=document.getElementById('saved-list');
   const count=document.getElementById('saved-count');
@@ -496,7 +561,18 @@ function renderSaved(){
     if(q.spQty)parts.push(`${q.spQty} spindles`);
     parts.push(q.colour);
     const photoHtml=q.photo?`<div class="qi-photo-wrap" id="wrap-${q.id}"><img src="${q.photo}" class="qi-photo" onclick="togglePhoto(${q.id})" alt="Site sketch"></div>`:'';
-    return `<div class="quote-item" style="flex-direction:column;align-items:stretch;gap:.5rem"><div style="display:flex;justify-content:space-between;align-items:center;gap:.75rem"><div class="qi-left"><div class="qi-name">${q.name}</div><div class="qi-meta">${q.date} &nbsp;&middot;&nbsp; ${parts.join(' &nbsp;&middot;&nbsp; ')}</div></div><div style="display:flex;align-items:center;gap:.5rem"><div class="qi-total">${fmt(q.total)}</div>${q.photo?`<button class="qi-photo-btn" onclick="togglePhoto(${q.id})" title="View sketch">&#128247;</button>`:''}<button class="qi-del" onclick="deleteQuote(${q.id})" title="Delete">&times;</button></div></div>${photoHtml}</div>`;
+    return `<div class="quote-item" style="flex-direction:column;align-items:stretch;gap:.5rem">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:.75rem">
+        <div class="qi-left"><div class="qi-name">${q.name}</div><div class="qi-meta">${q.date} &nbsp;&middot;&nbsp; ${parts.join(' &nbsp;&middot;&nbsp; ')}</div></div>
+        <div style="display:flex;align-items:center;gap:.5rem">
+          <div class="qi-total">${fmt(q.total)}</div>
+          <button class="qi-photo-btn" onclick="loadQuoteForEdit(${q.id})" title="Edit">&#9998;</button>
+          ${q.photo?`<button class="qi-photo-btn" onclick="togglePhoto(${q.id})" title="View sketch">&#128247;</button>`:''}
+          <button class="qi-del" onclick="deleteQuote(${q.id})" title="Delete">&times;</button>
+        </div>
+      </div>
+      ${photoHtml}
+    </div>`;
   }).join('');
 }
 function switchTab(id,btn){
@@ -506,6 +582,9 @@ function switchTab(id,btn){
   if(id==='saved')renderSaved();
 }
 function resetAll(){
+  editingId=null;
+  document.getElementById('save-btn').textContent='Save quote';
+  document.getElementById('editing-banner').style.display='none';
   ['colour','handrail','railing-type','railing-height','post-size','spindle-type'].forEach(id=>document.getElementById(id).selectedIndex=0);
   ['install-cost','linear-ft','post-qty','spindle-qty'].forEach(id=>{document.getElementById(id).value='';document.getElementById(id).classList.remove('ai-filled');});
   clearPhoto();calc();
