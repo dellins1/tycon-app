@@ -17,7 +17,7 @@ export default async function handler(req) {
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 500,
+        max_tokens: 800,
         messages: [{
           role: 'user',
           content: [
@@ -27,15 +27,22 @@ export default async function handler(req) {
             },
             {
               type: 'text',
-              text: `You are reading a hand-drawn site sketch for a railing installation job. Extract any measurements you can find.
+              text: `You are reading a hand-drawn site sketch for a railing installation job.
 
-Return ONLY a valid JSON object with these fields (use null if not found):
+Your job:
+1. COUNT the number of posts — posts are drawn as squares, circles, dots, or any repeated symbol at the ends/joints of lines
+2. FIND all railing section lengths — these are numbers written along or beside each line (e.g. "12ft", "8'", "10", "3.5m"). Add ALL of them together to get total linear feet. If values are in metres, convert to feet (1m = 3.28ft).
+3. COUNT spindles if labelled (e.g. "24 spindles", "x24")
+4. FIND railing height if noted (36 or 42 inches)
+
+Return ONLY a valid JSON object:
 {
-  "linear_feet": <total linear feet of railing as a number>,
-  "post_count": <number of posts as a number>,
-  "spindle_count": <number of spindles as a number>,
-  "height_inches": <railing height, either 36 or 42 as a number>,
-  "notes": "<brief description of what you read from the sketch>"
+  "linear_feet": <sum of ALL labelled section lengths as a number, null if none found>,
+  "post_count": <number of post symbols counted, null if unclear>,
+  "spindle_count": <number of spindles if labelled, null if not found>,
+  "height_inches": <36 or 42 if noted, null if not found>,
+  "sections": [<list of individual section lengths you found, e.g. [12, 8, 10]>],
+  "notes": "<brief description: how many sections found, what symbols used for posts, any assumptions made>"
 }
 
 Only return the JSON. No explanation.`
