@@ -235,8 +235,13 @@
     </div>
 
 
-    <div class="card">
-      <p class="sec-label">Additional products</p>
+    <div class="card" style="padding:0;overflow:hidden">
+      <button onclick="toggleProducts()" style="width:100%;display:flex;justify-content:space-between;align-items:center;padding:1rem 1.5rem;background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;" id="products-toggle">
+        <span style="font-size:.7rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--grey-400)">Additional products</span>
+        <span id="products-chevron" style="font-size:.75rem;color:var(--grey-400);transition:transform .2s">&#9660;</span>
+      </button>
+      <div id="products-body" style="display:none;padding:0 1.5rem 1.5rem;border-top:1px solid var(--grey-100)">
+      <div style="height:.75rem"></div>
 
       <!-- Gate Addon — flat, no qty -->
       <div class="product-row">
@@ -272,9 +277,9 @@
 
       <!-- Ball Caps — auto qty -->
       <div class="product-row">
-        <span class="product-label">Ball caps <span style="font-size:.75rem;color:var(--grey-400)">(auto from posts)</span></span>
+        <span class="product-label">Ball caps</span>
         <span class="product-price">$25 each</span>
-        <input type="number" class="product-qty auto" id="p-ballcaps" min="0" placeholder="0" readonly oninput="calc()">
+        <input type="number" class="product-qty" id="p-ballcaps" min="0" placeholder="0" oninput="calc()">
         <span class="product-subtotal" id="ps-ballcaps"></span>
       </div>
 
@@ -298,6 +303,7 @@
         </select>
         <input type="number" class="product-qty" id="p-col-qty" min="0" placeholder="qty" oninput="calc()" style="width:60px">
         <span class="product-subtotal" id="ps-col"></span>
+      </div>
       </div>
     </div>
 
@@ -517,6 +523,13 @@ function clearPhoto(){
 }
 
 /* ── Calculator ── */
+function toggleProducts(){
+  const body=document.getElementById('products-body');
+  const chev=document.getElementById('products-chevron');
+  const open=body.style.display==='none';
+  body.style.display=open?'block':'none';
+  chev.style.transform=open?'rotate(180deg)':'rotate(0deg)';
+}
 function calc(){
   const colour=document.getElementById('colour').value;
   const handrail=document.getElementById('handrail').value;
@@ -529,9 +542,7 @@ function calc(){
   const spType=document.getElementById('spindle-type').value;
   const spQty=parseFloat(document.getElementById('spindle-qty').value)||0;
 
-  // Auto-fill ball caps from post qty
-  const bcEl=document.getElementById('p-ballcaps');
-  if(postQty>0){bcEl.value=postQty;}else{bcEl.value='';}
+
 
   // Products
   const products=[
