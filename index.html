@@ -109,13 +109,19 @@
   .qi-total{font-size:1rem;font-weight:500;font-family:'DM Serif Display',serif;white-space:nowrap}
   .qi-del{background:none;border:none;cursor:pointer;color:var(--grey-400);font-size:1.1rem;padding:4px;line-height:1;transition:color .15s}.qi-del:hover{color:var(--danger)}
   .no-quotes{text-align:center;padding:1.5rem;color:var(--grey-400);font-size:.875rem}
+
+  .qi-photo-wrap{display:none;margin-top:.25rem}
+  .qi-photo-wrap.open{display:block}
+  .qi-photo{width:100%;max-height:260px;object-fit:contain;border-radius:4px;border:1px solid var(--grey-100);cursor:pointer}
+  .qi-photo-btn{background:none;border:1px solid var(--grey-200);border-radius:4px;cursor:pointer;padding:4px 8px;font-size:.85rem;color:var(--grey-400);transition:all .15s}
+  .qi-photo-btn:hover{border-color:var(--accent);color:var(--accent-dark)}
   .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--black);color:var(--white);padding:.75rem 1.25rem;border-radius:var(--radius-lg);font-size:.85rem;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;z-index:999}
   .toast.show{opacity:1;transform:translateY(0)}
 </style>
 </head>
 <body>
 <header>
-  <img src="Tyconlogowhite.png" alt="Tycon Railings" style="height:70px;width:auto;display:block;">
+  <img src="Tyconlogowhite.png" alt="Tycon Railings" style="height:38px;width:auto;display:block;">
   <div class="header-tag">Internal Quote Tool</div>
 </header>
 <div class="container">
@@ -284,6 +290,7 @@ const COLOUR_DOTS={"Black":"#1a1a1a","Pewter":"#8e8e8e","White":"#e8e8e4","Brown
 let savedQuotes=JSON.parse(localStorage.getItem('tycon_quotes')||'[]');
 let lastTotal=0,lastSnapshot=null;
 let sectionIdCounter=0;
+let currentPhotoDataUrl=null;
 
 const rtSel=document.getElementById('railing-type');
 RAILINGS.forEach(r=>{const o=document.createElement('option');o.value=r.code;o.textContent=r.code;rtSel.appendChild(o);});
@@ -391,6 +398,7 @@ async function handlePhoto(event){
     const base64=e.target.result.split(',')[1];
     const mediaType=file.type||'image/jpeg';
     preview.src=e.target.result;preview.style.display='block';
+    currentPhotoDataUrl=e.target.result;
     document.getElementById('clear-photo-btn').style.display='inline-flex';
     document.getElementById('section-panel').classList.remove('show');
     status.className='scan-status loading';status.textContent='Reading your sketch...';
@@ -420,6 +428,7 @@ function clearPhoto(){
   document.getElementById('scan-status').className='scan-status';
   document.getElementById('clear-photo-btn').style.display='none';
   document.getElementById('section-panel').classList.remove('show');
+  currentPhotoDataUrl=null;
   ['linear-ft','post-qty','spindle-qty'].forEach(id=>document.getElementById(id).classList.remove('ai-filled'));
 }
 
@@ -455,11 +464,26 @@ function saveQuote(){
   if(!lastSnapshot||lastTotal===0){showToast('Nothing to save yet.');return;}
   const name=prompt('Label this quote (e.g. customer name or address):');
   if(!name)return;
-  const quote={...lastSnapshot,name,date:new Date().toLocaleDateString('en-CA'),id:Date.now()};
+  let photoData=null;
+  if(currentPhotoDataUrl){
+    // Compress image before saving to keep storage small
+    const canvas=document.createElement('canvas');
+    const img=new Image();
+    img.src=currentPhotoDataUrl;
+    canvas.width=600;canvas.height=Math.round(img.height*(600/img.width));
+    const ctx=canvas.getContext('2d');
+    ctx.drawImage(img,0,0,canvas.width,canvas.height);
+    photoData=canvas.toDataURL('image/jpeg',0.6);
+  }
+  const quote={...lastSnapshot,name,date:new Date().toLocaleDateString('en-CA'),id:Date.now(),photo:photoData};
   savedQuotes.unshift(quote);localStorage.setItem('tycon_quotes',JSON.stringify(savedQuotes));
   renderSaved();showToast('Quote saved!');
 }
 function deleteQuote(id){savedQuotes=savedQuotes.filter(q=>q.id!==id);localStorage.setItem('tycon_quotes',JSON.stringify(savedQuotes));renderSaved();}
+function togglePhoto(id){
+  const wrap=document.getElementById('wrap-'+id);
+  if(wrap)wrap.classList.toggle('open');
+}
 function renderSaved(){
   const list=document.getElementById('saved-list');
   const count=document.getElementById('saved-count');
@@ -471,7 +495,8 @@ function renderSaved(){
     if(q.postQty)parts.push(`${q.postQty} posts (${q.postSize}")`);
     if(q.spQty)parts.push(`${q.spQty} spindles`);
     parts.push(q.colour);
-    return `<div class="quote-item"><div class="qi-left"><div class="qi-name">${q.name}</div><div class="qi-meta">${q.date} &nbsp;&middot;&nbsp; ${parts.join(' &nbsp;&middot;&nbsp; ')}</div></div><div class="qi-total">${fmt(q.total)}</div><button class="qi-del" onclick="deleteQuote(${q.id})" title="Delete">&times;</button></div>`;
+    const photoHtml=q.photo?`<div class="qi-photo-wrap" id="wrap-${q.id}"><img src="${q.photo}" class="qi-photo" onclick="togglePhoto(${q.id})" alt="Site sketch"></div>`:'';
+    return `<div class="quote-item" style="flex-direction:column;align-items:stretch;gap:.5rem"><div style="display:flex;justify-content:space-between;align-items:center;gap:.75rem"><div class="qi-left"><div class="qi-name">${q.name}</div><div class="qi-meta">${q.date} &nbsp;&middot;&nbsp; ${parts.join(' &nbsp;&middot;&nbsp; ')}</div></div><div style="display:flex;align-items:center;gap:.5rem"><div class="qi-total">${fmt(q.total)}</div>${q.photo?`<button class="qi-photo-btn" onclick="togglePhoto(${q.id})" title="View sketch">&#128247;</button>`:''}<button class="qi-del" onclick="deleteQuote(${q.id})" title="Delete">&times;</button></div></div>${photoHtml}</div>`;
   }).join('');
 }
 function switchTab(id,btn){
