@@ -169,6 +169,19 @@
   .pad-modal-btns button{flex:1;height:32px;border-radius:var(--radius);font-size:12px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif}
   .pad-ok{background:var(--black);color:var(--white);border:none}
   .pad-cancel{background:transparent;border:1px solid var(--grey-200);color:var(--grey-600)}
+
+  /* Status badges */
+  .status-badge{display:inline-block;font-size:11px;font-weight:500;padding:2px 10px;border-radius:20px}
+  .status-Lead{background:#E6F1FB;color:#0C447C}
+  .status-Quoted{background:#FAEEDA;color:#633806}
+  .status-Scheduled{background:#E1F5EE;color:#085041}
+  .status-Complete{background:#EAF3DE;color:#27500A}
+  .qi-status{font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;white-space:nowrap}
+  textarea:focus{outline:none;border-color:var(--accent) !important}
+
+  .filter-btn{padding:4px 12px;font-size:12px;border:1px solid var(--grey-200);border-radius:20px;background:transparent;cursor:pointer;color:var(--grey-400);font-family:'DM Sans',sans-serif;transition:all .15s}
+  .filter-btn:hover{border-color:var(--grey-400);color:var(--black)}
+  .filter-btn.active{background:var(--black);color:var(--white);border-color:var(--black)}
   .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--black);color:var(--white);padding:.75rem 1.25rem;border-radius:var(--radius-lg);font-size:.85rem;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;z-index:999}
   .toast.show{opacity:1;transform:translateY(0)}
 </style>
@@ -261,6 +274,37 @@
           <button class="btn btn-ghost" id="clear-photo-btn" style="display:none" onclick="clearPhoto()">Clear photo</button>
         </div>
       </div><!-- end pad-scan -->
+    </div>
+
+    <div class="card">
+      <p class="sec-label">Customer &amp; job info</p>
+      <div class="grid grid-3">
+        <div class="fgroup" style="grid-column:1/-1">
+          <label>Customer name</label>
+          <input type="text" id="customer-name" placeholder="Jane Smith" style="font-size:16px">
+        </div>
+        <div class="fgroup">
+          <label>Phone number</label>
+          <input type="tel" id="customer-phone" placeholder="416-555-0100" style="font-size:16px">
+        </div>
+        <div class="fgroup" style="grid-column:2/4">
+          <label>Status</label>
+          <select id="job-status" onchange="updateStatusBadge()">
+            <option value="Lead">Lead</option>
+            <option value="Quoted">Quoted</option>
+            <option value="Scheduled">Scheduled</option>
+            <option value="Complete">Complete</option>
+          </select>
+        </div>
+        <div class="fgroup" style="grid-column:1/-1">
+          <label>Job address</label>
+          <input type="text" id="customer-address" placeholder="123 Main St, Vaughan, ON" style="font-size:16px">
+        </div>
+        <div class="fgroup" style="grid-column:1/-1">
+          <label>Notes</label>
+          <textarea id="job-notes" placeholder="e.g. concrete mount, stair section on left, customer prefers black..." style="width:100%;min-height:72px;padding:8px 10px;border:1px solid var(--grey-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:16px;color:var(--black);background:var(--white);resize:vertical;line-height:1.5"></textarea>
+        </div>
+      </div>
     </div>
 
     <div class="card">
@@ -442,6 +486,13 @@
       <div class="saved-header">
         <p class="sec-label" style="margin:0;border:none;padding:0">Saved quotes</p>
         <span class="saved-count" id="saved-count">0 saved</span>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem">
+        <button class="filter-btn active" onclick="setFilter('All',this)">All</button>
+        <button class="filter-btn" onclick="setFilter('Lead',this)">Lead</button>
+        <button class="filter-btn" onclick="setFilter('Quoted',this)">Quoted</button>
+        <button class="filter-btn" onclick="setFilter('Scheduled',this)">Scheduled</button>
+        <button class="filter-btn" onclick="setFilter('Complete',this)">Complete</button>
       </div>
       <div id="saved-list"><div class="no-quotes">No saved quotes yet.</div></div>
     </div>
@@ -839,6 +890,12 @@ window.padApply=function(){
 };
 
 
+function updateStatusBadge(){
+  const status=document.getElementById('job-status').value;
+  const sel=document.getElementById('job-status');
+  sel.className='';
+  sel.style.borderColor=status==='Lead'?'#378ADD':status==='Quoted'?'#BA7517':status==='Scheduled'?'#1D9E75':'#639922';
+}
 function toggleProducts(){
   const body=document.getElementById('products-body');
   const chev=document.getElementById('products-chevron');
@@ -906,7 +963,12 @@ function calc(){
   document.getElementById('breakdown-body').innerHTML=rows;
   lastTotal=total;
   const prodSnap={gateAddon:parseFloat(document.getElementById('p-gate-addon').value)||0,scGate:parseFloat(document.getElementById('p-sc-gate').value)||0,regGate:parseFloat(document.getElementById('p-reg-gate').value)||0,stair:parseFloat(document.getElementById('p-stair').value)||0,ballcaps:parseFloat(document.getElementById('p-ballcaps').value)||0,pegleg:parseFloat(document.getElementById('p-pegleg').value)||0,angleAdapter:parseFloat(document.getElementById('p-angle-adapter').value)||0,handrail:parseFloat(document.getElementById('p-handrail').value)||0,handrailBrackets:parseFloat(document.getElementById('p-handrail-brackets').value)||0,colSize:document.getElementById('p-col-size').value,colQty:parseFloat(document.getElementById('p-col-qty').value)||0};
-  lastSnapshot={colour,handrail,install,railCode,height,linFt,postSize,postQty,spType,spQty,total,products:prodSnap};
+  const customerName=document.getElementById('customer-name').value.trim();
+  const customerPhone=document.getElementById('customer-phone').value.trim();
+  const customerAddress=document.getElementById('customer-address').value.trim();
+  const jobNotes=document.getElementById('job-notes').value.trim();
+  const jobStatus=document.getElementById('job-status').value;
+  lastSnapshot={colour,handrail,install,railCode,height,linFt,postSize,postQty,spType,spQty,total,products:prodSnap,customerName,customerPhone,customerAddress,jobNotes,jobStatus};
 }
 
 function saveQuote(){
@@ -934,7 +996,8 @@ function saveQuote(){
       return;
     }
   }
-  const name=prompt('Label this quote (e.g. customer name or address):');
+  const defaultName=lastSnapshot.customerName||lastSnapshot.customerAddress||'';
+  const name=prompt('Label this quote:',defaultName);
   if(!name)return;
   const quote={...lastSnapshot,name,date:new Date().toLocaleDateString('en-CA'),id:Date.now(),photo:photoData};
   savedQuotes.unshift(quote);localStorage.setItem('tycon_quotes',JSON.stringify(savedQuotes));
@@ -944,6 +1007,13 @@ function deleteQuote(id){
   if(!confirm('Delete this quote?'))return;
   savedQuotes=savedQuotes.filter(q=>q.id!==id);
   localStorage.setItem('tycon_quotes',JSON.stringify(savedQuotes));
+  renderSaved();
+}
+let savedFilter='All';
+function setFilter(f,btn){
+  savedFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
   renderSaved();
 }
 function togglePhoto(id){
@@ -966,6 +1036,14 @@ function loadQuoteForEdit(id){
   document.getElementById('colour').value=q.colour||'Black';
   document.getElementById('handrail').value=q.handrail||'Empress';
   document.getElementById('install-cost').value=q.install||'';
+
+  // Restore customer info
+  document.getElementById('customer-name').value=q.customerName||'';
+  document.getElementById('customer-phone').value=q.customerPhone||'';
+  document.getElementById('customer-address').value=q.customerAddress||'';
+  document.getElementById('job-notes').value=q.jobNotes||'';
+  document.getElementById('job-status').value=q.jobStatus||'Lead';
+  updateStatusBadge();
 
   // Load photo if saved
   if(q.photo){
@@ -1012,17 +1090,32 @@ function renderSaved(){
   const count=document.getElementById('saved-count');
   count.textContent=savedQuotes.length+' saved';
   if(!savedQuotes.length){list.innerHTML='<div class="no-quotes">No saved quotes yet.</div>';return;}
-  list.innerHTML=savedQuotes.map(q=>{
+  const filtered=savedFilter==='All'?savedQuotes:savedQuotes.filter(q=>(q.jobStatus||'Lead')===savedFilter);
+  if(!filtered.length){list.innerHTML='<div class="no-quotes">No quotes with this status.</div>';return;}
+  list.innerHTML=filtered.map(q=>{
     const parts=[];
     if(q.railCode&&q.linFt)parts.push(`${q.railCode} ${q.height}" · ${q.linFt} ft`);
     if(q.postQty)parts.push(`${q.postQty} posts (${q.postSize}")`);
     if(q.spQty)parts.push(`${q.spQty} spindles`);
     parts.push(q.colour);
     const photoHtml=q.photo?`<div class="qi-photo-wrap" id="wrap-${q.id}"><img src="${q.photo}" class="qi-photo" onclick="togglePhoto(${q.id})" alt="Site sketch"></div>`:'';
+    const statusClass='qi-status status-'+(q.jobStatus||'Lead');
+    const statusLabel=q.jobStatus||'Lead';
+    const phoneLine=q.customerPhone?`<div style="font-size:12px;color:var(--grey-400);margin-top:1px">${q.customerPhone}</div>`:'';    const addrLine=q.customerAddress?`<div style="font-size:12px;color:var(--grey-400);margin-top:1px">${q.customerAddress}</div>`:'';
+    const notesLine=q.jobNotes?`<div style="font-size:12px;color:var(--grey-400);margin-top:3px;font-style:italic">${q.jobNotes}</div>`:'';
     return `<div class="quote-item" style="flex-direction:column;align-items:stretch;gap:.5rem">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:.75rem">
-        <div class="qi-left"><div class="qi-name">${q.name}</div><div class="qi-meta">${q.date} &nbsp;&middot;&nbsp; ${parts.join(' &nbsp;&middot;&nbsp; ')}</div></div>
-        <div style="display:flex;align-items:center;gap:.5rem">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem">
+        <div class="qi-left">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+            <div class="qi-name">${q.name}</div>
+            <span class="${statusClass}">${statusLabel}</span>
+          </div>
+          ${phoneLine}
+          ${addrLine}
+          <div class="qi-meta" style="margin-top:2px">${q.date} &nbsp;&middot;&nbsp; ${parts.join(' &nbsp;&middot;&nbsp; ')}</div>
+          ${notesLine}
+        </div>
+        <div style="display:flex;align-items:center;gap:.5rem;flex-shrink:0">
           <div class="qi-total">${fmt(q.total)}</div>
           <button class="qi-photo-btn" onclick="loadQuoteForEdit(${q.id})" title="Edit">&#9998;</button>
           ${q.photo?`<button class="qi-photo-btn" onclick="togglePhoto(${q.id})" title="View sketch">&#128247;</button>`:''}
@@ -1043,7 +1136,8 @@ function resetAll(){
   editingId=null;
   document.getElementById('save-btn').textContent='Save quote';
   document.getElementById('editing-banner').style.display='none';
-  ['colour','handrail','railing-type','railing-height','post-size','spindle-type','p-col-size'].forEach(id=>document.getElementById(id).selectedIndex=0);
+  ['colour','handrail','railing-type','railing-height','post-size','spindle-type','p-col-size','job-status'].forEach(id=>document.getElementById(id).selectedIndex=0);
+  ['customer-name','customer-phone','customer-address','job-notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   ['install-cost','linear-ft','post-qty','spindle-qty','p-gate-addon','p-sc-gate','p-reg-gate','p-stair','p-ballcaps','p-pegleg','p-angle-adapter','p-handrail','p-handrail-brackets','p-col-qty'].forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.classList.remove('ai-filled');}});
   clearPhoto();calc();
 }
