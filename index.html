@@ -648,7 +648,9 @@ function fsDraw(){
     fsCtx.beginPath();fsCtx.moveTo(p1.x,p1.y);fsCtx.lineTo(p2.x,p2.y);
     fsCtx.strokeStyle='#378ADD';fsCtx.lineWidth=3;fsCtx.stroke();
     const mx=(p1.x+p2.x)/2,my=(p1.y+p2.y)/2;
-    const angle=Math.atan2(p2.y-p1.y,p2.x-p1.x);
+    let angle=Math.atan2(p2.y-p1.y,p2.x-p1.x);
+    if(angle>Math.PI/2)angle-=Math.PI;
+    if(angle<-Math.PI/2)angle+=Math.PI;
     fsCtx.save();fsCtx.translate(mx,my);fsCtx.rotate(angle);
     const label=(s.length!==null?s.length:'?')+'ft';
     const tw=fsCtx.measureText(label).width+14;
