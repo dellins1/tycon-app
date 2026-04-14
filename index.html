@@ -141,7 +141,7 @@
   .fs-stats{display:flex;gap:10px;flex-wrap:wrap}
   .fs-stat{font-size:12px;color:var(--grey-400)}.fs-stat span{font-weight:500;color:var(--black);margin-left:3px}
   .fs-hint{font-size:12px;color:var(--grey-400);padding:.25rem 1rem;flex-shrink:0}
-  .pad-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:10000;align-items:center;justify-content:center}
+  .pad-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:10001;align-items:center;justify-content:center}
   .pad-modal-bg.open{display:flex}
   /* Drawing pad */
   .pad-tabs{display:flex;gap:0;border-bottom:1px solid var(--grey-100);margin-bottom:1rem}
@@ -1033,6 +1033,16 @@ renderSaved();
   <div class="fs-hint" id="fs-hint">Tap to place a post</div>
   <div class="fs-canvas-wrap" id="fs-canvas-wrap">
     <canvas id="fs-canvas"></canvas>
+    <div class="pad-modal-bg" id="pad-modal-bg" style="position:fixed;inset:0;z-index:10001">
+      <div class="pad-modal">
+        <p>Section length (ft)</p>
+        <input type="number" id="pad-len-input" min="0" step="0.5" placeholder="e.g. 12" inputmode="decimal">
+        <div class="pad-modal-btns">
+          <button class="pad-cancel" onclick="padCancelLength()">Cancel</button>
+          <button class="pad-ok" onclick="padConfirmLength()">OK</button>
+        </div>
+      </div>
+    </div>
   </div>
   <div class="fs-footer">
     <div class="fs-stats">
