@@ -477,6 +477,7 @@
     </div>
     <div class="btn-row">
       <button class="btn btn-ghost" onclick="resetAll()">Clear</button>
+      <button class="btn btn-ghost" onclick="exportPDF()" id="pdf-btn">Export PDF</button>
       <button class="btn btn-primary" id="save-btn" onclick="saveQuote()">Save quote</button>
     </div>
   </div>
@@ -1141,6 +1142,161 @@ function resetAll(){
   ['install-cost','linear-ft','post-qty','spindle-qty','p-gate-addon','p-sc-gate','p-reg-gate','p-stair','p-ballcaps','p-pegleg','p-angle-adapter','p-handrail','p-handrail-brackets','p-col-qty'].forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.classList.remove('ai-filled');}});
   clearPhoto();calc();
 }
+
+function exportPDF(){
+  if(!lastSnapshot||lastTotal===0){showToast('Build a quote first before exporting.');return;}
+  const q=lastSnapshot;
+  const date=new Date().toLocaleDateString('en-CA',{year:'numeric',month:'long',day:'numeric'});
+  const quoteNum='TRC-'+Date.now().toString().slice(-6);
+
+  // Build line items
+  const POSTS={"2":40,"3":42,"4":57};
+  const SPINDLES={"WALL-regular":4,"WALL-platinum":6,"MINI-regular":1};
+  const RAILINGS=[
+    {code:"R1",p36:30,p42:32},{code:"R2",p36:34,p42:35},{code:"R3",p36:32.5,p42:33.5},
+    {code:"R4",p36:34,p42:35},{code:"R4S",p36:53,p42:55},{code:"R5",p36:37,p42:38},
+    {code:"R5S",p36:55,p42:57},{code:"R6",p36:35,p42:36},{code:"R6S",p36:54,p42:56},
+    {code:"R7",p36:38,p42:39},{code:"R8",p36:42,p42:43},{code:"R9",p36:39,p42:40},
+    {code:"R10",p36:37,p42:38},{code:"R11",p36:40,p42:41},{code:"R12",p36:36,p42:37},
+    {code:"R12OPEN",p36:34,p42:36},{code:"R13",p36:39,p42:40},{code:"R13OPEN",p36:39,p42:40},
+    {code:"R14",p36:37,p42:38},{code:"R14OPEN",p36:37,p42:38},{code:"R15",p36:38,p42:39},
+    {code:"R16",p36:35,p42:36},{code:"R17",p36:37,p42:38},{code:"R18",p36:34,p42:35},
+    {code:"R19",p36:56,p42:58},{code:"R20",p36:70,p42:71},{code:"PS1",p36:36,p42:38},
+    {code:"PS2",p36:42,p42:44},{code:"PS3",p36:46,p42:48},{code:"GR1",p36:65,p42:67},
+    {code:"GR2",p36:70,p42:72},{code:"GR3",p36:81,p42:83},{code:"GR4",p36:65,p42:67},
+    {code:"GR5",p36:91,p42:97},{code:"GR6",p36:85,p42:92}
+  ];
+
+  let lineItems=[];
+  if(q.railCode&&q.linFt>0){
+    const r=RAILINGS.find(x=>x.code===q.railCode);
+    const rate=q.height==='42'?r.p42:r.p36;
+    lineItems.push({desc:`Railing ${q.railCode} (${q.height}")`,qty:q.linFt,unit:'lin. ft',rate,total:rate*q.linFt});
+  }
+  if(q.postQty>0){
+    const rate=POSTS[q.postSize];
+    lineItems.push({desc:`Posts (${q.postSize}")`,qty:q.postQty,unit:'posts',rate,total:rate*q.postQty});
+  }
+  if(q.spQty>0){
+    const rate=SPINDLES[q.spType];
+    const label=q.spType.replace('-',' ');
+    lineItems.push({desc:`Spindles (${label})`,qty:q.spQty,unit:'spindles',rate,total:rate*q.spQty});
+  }
+  if(q.install>0) lineItems.push({desc:'Installation',qty:1,unit:'',rate:q.install,total:q.install});
+
+  // Additional products
+  const prodMap=[
+    {key:'gateAddon',label:'Gate addon',price:90},
+    {key:'scGate',label:'Self closing gate',price:95},
+    {key:'regGate',label:'Regular gate',price:85},
+    {key:'stair',label:'Stair template',price:25},
+    {key:'ballcaps',label:'Ball caps',price:25},
+    {key:'pegleg',label:'Peg leg',price:5.5},
+    {key:'angleAdapter',label:'Angle adapter',price:50},
+    {key:'handrail',label:'Handrail',price:18},
+    {key:'handrailBrackets',label:'Handrail brackets',price:11},
+  ];
+  if(q.products){
+    prodMap.forEach(p=>{
+      const qty=q.products[p.key]||0;
+      if(qty>0) lineItems.push({desc:p.label,qty,unit:'each',rate:p.price,total:qty*p.price});
+    });
+    if(q.products.colSize&&q.products.colQty>0){
+      lineItems.push({desc:'Column',qty:q.products.colQty,unit:'each',rate:parseFloat(q.products.colSize),total:parseFloat(q.products.colSize)*q.products.colQty});
+    }
+  }
+
+  const lineRows=lineItems.map(li=>`
+    <tr>
+      <td style="padding:10px 8px;border-bottom:1px solid #f0f0ec;color:#333">${li.desc}</td>
+      <td style="padding:10px 8px;border-bottom:1px solid #f0f0ec;text-align:center;color:#555">${li.qty}${li.unit?' '+li.unit:''}</td>
+      <td style="padding:10px 8px;border-bottom:1px solid #f0f0ec;text-align:right;color:#555">$${li.rate.toFixed(2)}</td>
+      <td style="padding:10px 8px;border-bottom:1px solid #f0f0ec;text-align:right;font-weight:500;color:#111">$${Math.round(li.total).toLocaleString('en-CA')}</td>
+    </tr>`).join('');
+
+  const specRows=[
+    q.colour?`<tr><td style="padding:5px 0;color:#888;font-size:13px">Colour</td><td style="padding:5px 0;font-size:13px;font-weight:500">${q.colour}</td></tr>`:'',
+    q.handrail?`<tr><td style="padding:5px 0;color:#888;font-size:13px">Handrail profile</td><td style="padding:5px 0;font-size:13px;font-weight:500">${q.handrail}</td></tr>`:'',
+  ].filter(Boolean).join('');
+
+  const pdfHTML=`<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Quote ${quoteNum} — Tycon Railings</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',sans-serif;color:#111;background:#fff;padding:40px;max-width:800px;margin:0 auto}
+  @media print{body{padding:20px}@page{margin:1.5cm}}
+</style>
+</head>
+<body>
+  <!-- Header -->
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:40px;padding-bottom:24px;border-bottom:2px solid #111">
+    <div>
+      <div style="font-family:'DM Serif Display',serif;font-size:28px;margin-bottom:4px">Tycon Railings</div>
+      <div style="font-size:13px;color:#888">tyconrailings.ca &nbsp;|&nbsp; Vaughan, ON</div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-size:13px;color:#888;margin-bottom:2px">Quote #${quoteNum}</div>
+      <div style="font-size:13px;color:#888">${date}</div>
+    </div>
+  </div>
+
+  <!-- Customer info -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-bottom:36px">
+    <div>
+      <div style="font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:#888;margin-bottom:8px">Prepared for</div>
+      ${q.customerName?`<div style="font-size:16px;font-weight:500;margin-bottom:4px">${q.customerName}</div>`:''}
+      ${q.customerPhone?`<div style="font-size:13px;color:#555;margin-bottom:2px">${q.customerPhone}</div>`:''}
+      ${q.customerAddress?`<div style="font-size:13px;color:#555">${q.customerAddress}</div>`:''}
+    </div>
+    ${specRows?`<div>
+      <div style="font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:#888;margin-bottom:8px">Specifications</div>
+      <table style="width:100%;border-collapse:collapse">${specRows}</table>
+    </div>`:''}
+  </div>
+
+  <!-- Line items -->
+  <table style="width:100%;border-collapse:collapse;margin-bottom:24px">
+    <thead>
+      <tr style="background:#0f0f0f;color:#fafaf8">
+        <th style="padding:10px 8px;text-align:left;font-size:12px;font-weight:500;letter-spacing:.05em">Description</th>
+        <th style="padding:10px 8px;text-align:center;font-size:12px;font-weight:500;letter-spacing:.05em">Qty</th>
+        <th style="padding:10px 8px;text-align:right;font-size:12px;font-weight:500;letter-spacing:.05em">Rate</th>
+        <th style="padding:10px 8px;text-align:right;font-size:12px;font-weight:500;letter-spacing:.05em">Amount</th>
+      </tr>
+    </thead>
+    <tbody>${lineRows}</tbody>
+  </table>
+
+  <!-- Total -->
+  <div style="display:flex;justify-content:flex-end;margin-bottom:32px">
+    <div style="min-width:220px">
+      <div style="display:flex;justify-content:space-between;padding:12px 0;border-top:2px solid #111">
+        <span style="font-size:16px;font-weight:500">Total</span>
+        <span style="font-size:22px;font-weight:500;font-family:'DM Serif Display',serif">$${Math.round(q.total).toLocaleString('en-CA')}</span>
+      </div>
+      <div style="font-size:11px;color:#888;margin-top:4px;text-align:right">All prices in CAD. HST not included.</div>
+    </div>
+  </div>
+
+  ${q.jobNotes?`<!-- Notes --><div style="background:#f5f5f3;border-radius:6px;padding:16px;margin-bottom:32px"><div style="font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:#888;margin-bottom:6px">Notes</div><div style="font-size:13px;color:#333">${q.jobNotes}</div></div>`:''}
+
+  <!-- Footer -->
+  <div style="border-top:1px solid #e8e8e4;padding-top:20px;font-size:12px;color:#aaa;text-align:center">
+    This quote is valid for 30 days. Thank you for choosing Tycon Railings.
+  </div>
+</body>
+</html>`;
+
+  const win=window.open('','_blank');
+  win.document.write(pdfHTML);
+  win.document.close();
+  setTimeout(()=>win.print(),600);
+}
+
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
 renderSaved();
 </script>
