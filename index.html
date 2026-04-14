@@ -128,6 +128,21 @@
   .product-select:focus{outline:none;border-color:var(--accent)}
   .product-subtotal{font-size:.875rem;font-weight:500;color:var(--black);white-space:nowrap;min-width:60px;text-align:right}
 
+
+  /* Fullscreen drawing mode */
+  .fs-overlay{display:none;position:fixed;inset:0;background:var(--white);z-index:9999;flex-direction:column;padding:0}
+  .fs-overlay.open{display:flex}
+  .fs-header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;border-bottom:1px solid var(--grey-100);background:var(--white);flex-shrink:0}
+  .fs-title{font-size:.85rem;font-weight:500;color:var(--black)}
+  .fs-toolbar{display:flex;gap:6px;padding:.5rem 1rem;border-bottom:1px solid var(--grey-100);flex-wrap:wrap;flex-shrink:0;background:var(--white)}
+  .fs-canvas-wrap{flex:1;overflow:hidden;position:relative;touch-action:none}
+  .fs-canvas-wrap canvas{display:block;width:100%;height:100%}
+  .fs-footer{padding:.75rem 1rem;border-top:1px solid var(--grey-100);background:var(--white);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+  .fs-stats{display:flex;gap:10px;flex-wrap:wrap}
+  .fs-stat{font-size:12px;color:var(--grey-400)}.fs-stat span{font-weight:500;color:var(--black);margin-left:3px}
+  .fs-hint{font-size:12px;color:var(--grey-400);padding:.25rem 1rem;flex-shrink:0}
+  .pad-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:10000;align-items:center;justify-content:center}
+  .pad-modal-bg.open{display:flex}
   /* Drawing pad */
   .pad-tabs{display:flex;gap:0;border-bottom:1px solid var(--grey-100);margin-bottom:1rem}
   .pad-tab{padding:.5rem 1rem;font-size:.8rem;font-weight:500;background:none;border:none;cursor:pointer;color:var(--grey-400);border-bottom:2px solid transparent;margin-bottom:-1px;font-family:'DM Sans',sans-serif;transition:all .15s}
@@ -181,34 +196,20 @@
 
       <!-- DRAW PAD -->
       <div class="pad-pane active" id="pad-draw">
-        <div class="pad-toolbar">
-          <button class="pad-btn active" id="pad-btn-post" onclick="padSetMode('post')">Place post</button>
-          <button class="pad-btn" id="pad-btn-connect" onclick="padSetMode('connect')">Connect</button>
-          <button class="pad-btn" id="pad-btn-delete" onclick="padSetMode('delete')">Delete</button>
-          <button class="pad-btn danger" onclick="padClearAll()">Clear</button>
-        </div>
-        <div class="pad-canvas-wrap">
-          <canvas id="pad-canvas" height="300"></canvas>
-          <div class="pad-modal-bg" id="pad-modal-bg">
-            <div class="pad-modal">
-              <p>Section length (ft)</p>
-              <input type="number" id="pad-len-input" min="0" step="0.5" placeholder="e.g. 12">
-              <div class="pad-modal-btns">
-                <button class="pad-cancel" onclick="padCancelLength()">Cancel</button>
-                <button class="pad-ok" onclick="padConfirmLength()">OK</button>
-              </div>
-            </div>
+        <div style="text-align:center;padding:1.5rem 1rem">
+          <div style="font-size:2rem;margin-bottom:.5rem">&#9998;</div>
+          <p style="font-size:.9rem;font-weight:500;color:var(--grey-600);margin-bottom:.25rem">Draw your floor plan</p>
+          <p style="font-size:.78rem;color:var(--grey-400);margin-bottom:1rem">Tap to place posts, connect them, and enter section lengths</p>
+          <button class="btn btn-primary" onclick="openFsDrawing()" style="margin-bottom:.75rem">Open drawing pad</button>
+          <div class="pad-summary" id="pad-summary" style="display:none;justify-content:center;margin-top:.75rem">
+            <div class="pad-stat">Posts<span id="pad-s-posts">0</span></div>
+            <div class="pad-stat">Sections<span id="pad-s-sections">0</span></div>
+            <div class="pad-stat">Linear ft<span id="pad-s-total">0</span></div>
+            <div class="pad-stat">Spindles<span id="pad-s-spindles">0</span></div>
           </div>
-        </div>
-        <div class="pad-hint" id="pad-hint">Tap the canvas to place a post</div>
-        <div class="pad-summary" id="pad-summary" style="display:none">
-          <div class="pad-stat">Posts<span id="pad-s-posts">0</span></div>
-          <div class="pad-stat">Sections<span id="pad-s-sections">0</span></div>
-          <div class="pad-stat">Linear ft<span id="pad-s-total">0</span></div>
-          <div class="pad-stat">Spindles<span id="pad-s-spindles">0</span></div>
-        </div>
-        <div style="display:flex;gap:.5rem;margin-top:.75rem">
-          <button class="btn btn-accent" onclick="padApply()" id="pad-apply-btn" style="display:none">Apply to form</button>
+          <div style="margin-top:.75rem">
+            <button class="btn btn-accent" onclick="padApply()" id="pad-apply-btn" style="display:none">Apply to form</button>
+          </div>
         </div>
       </div>
 
@@ -600,186 +601,217 @@ function switchPadTab(id, btn){
 }
 
 /* ── Drawing Pad ── */
-(function(){
-  let canvas,ctx,W,H;
-  let posts=[],segments=[],mode='post',pendingFrom=null,pendingSegment=null,postCounter=1;
-  const POST_R=10;
 
-  function init(){
-    canvas=document.getElementById('pad-canvas');
-    ctx=canvas.getContext('2d');
-    padResize();
-    canvas.addEventListener('click',handleTap);
-    canvas.addEventListener('touchend',handleTap,{passive:false});
-    document.getElementById('pad-len-input').addEventListener('keydown',e=>{
-      if(e.key==='Enter')padConfirmLength();
-      if(e.key==='Escape')padCancelLength();
-    });
+function openFsDrawing(){
+  document.getElementById('fs-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+  setTimeout(()=>{
+    fsResize();
+    fsDraw();
+  },50);
+}
+
+function closeFsDrawing(){
+  document.getElementById('fs-overlay').classList.remove('open');
+  document.body.style.overflow='';
+  updatePadSummary();
+}
+
+/* ── Shared Drawing Pad State ── */
+var padPosts=[], padSegments=[], padMode='post', padPendingFrom=null, padPendingSegment=null, padPostCounter=1;
+var fsCanvas, fsCtx, fsW, fsH;
+const PAD_POST_R=12;
+
+function fsResize(){
+  fsCanvas=document.getElementById('fs-canvas');
+  if(!fsCanvas)return;
+  fsCtx=fsCanvas.getContext('2d');
+  const wrap=document.getElementById('fs-canvas-wrap');
+  fsW=wrap.clientWidth;
+  fsH=wrap.clientHeight;
+  fsCanvas.width=fsW;
+  fsCanvas.height=fsH;
+  fsDraw();
+}
+
+function fsDraw(){
+  if(!fsCtx||!fsW)return;
+  fsCtx.clearRect(0,0,fsW,fsH);
+  // grid
+  fsCtx.strokeStyle='#f0f0ec';fsCtx.lineWidth=1;
+  for(let x=0;x<fsW;x+=50){fsCtx.beginPath();fsCtx.moveTo(x,0);fsCtx.lineTo(x,fsH);fsCtx.stroke();}
+  for(let y=0;y<fsH;y+=50){fsCtx.beginPath();fsCtx.moveTo(0,y);fsCtx.lineTo(fsW,y);fsCtx.stroke();}
+  // segments
+  padSegments.forEach(s=>{
+    const p1=padPosts.find(p=>p.id===s.from), p2=padPosts.find(p=>p.id===s.to);
+    if(!p1||!p2)return;
+    fsCtx.beginPath();fsCtx.moveTo(p1.x,p1.y);fsCtx.lineTo(p2.x,p2.y);
+    fsCtx.strokeStyle='#378ADD';fsCtx.lineWidth=3;fsCtx.stroke();
+    const mx=(p1.x+p2.x)/2,my=(p1.y+p2.y)/2;
+    const angle=Math.atan2(p2.y-p1.y,p2.x-p1.x);
+    fsCtx.save();fsCtx.translate(mx,my);fsCtx.rotate(angle);
+    const label=(s.length!==null?s.length:'?')+'ft';
+    const tw=fsCtx.measureText(label).width+14;
+    fsCtx.fillStyle='#fafaf8';fsCtx.fillRect(-tw/2,-13,tw,22);
+    fsCtx.fillStyle='#185FA5';fsCtx.font='bold 13px sans-serif';
+    fsCtx.textAlign='center';fsCtx.textBaseline='middle';fsCtx.fillText(label,0,0);
+    fsCtx.restore();
+  });
+  // posts
+  padPosts.forEach(p=>{
+    const sel=padPendingFrom&&padPendingFrom.id===p.id;
+    fsCtx.beginPath();fsCtx.rect(p.x-PAD_POST_R,p.y-PAD_POST_R,PAD_POST_R*2,PAD_POST_R*2);
+    fsCtx.fillStyle=sel?'#fffbf4':'#fafaf8';fsCtx.fill();
+    fsCtx.strokeStyle=sel?'#c8a96e':'#0f0f0f';fsCtx.lineWidth=2.5;fsCtx.stroke();
+    fsCtx.fillStyle='#0f0f0f';fsCtx.font='bold 11px sans-serif';
+    fsCtx.textAlign='center';fsCtx.textBaseline='middle';fsCtx.fillText(p.id,p.x,p.y);
+  });
+}
+
+function fsGetPos(e,canvas){
+  const rect=canvas.getBoundingClientRect();
+  const sx=canvas.width/rect.width, sy=canvas.height/rect.height;
+  const src=e.changedTouches?e.changedTouches[0]:e;
+  return{x:(src.clientX-rect.left)*sx, y:(src.clientY-rect.top)*sy};
+}
+
+function fsHitPost(x,y){return padPosts.find(p=>Math.abs(p.x-x)<PAD_POST_R+6&&Math.abs(p.y-y)<PAD_POST_R+6);}
+
+function fsHitSeg(x,y){
+  return padSegments.find(s=>{
+    const p1=padPosts.find(p=>p.id===s.from),p2=padPosts.find(p=>p.id===s.to);
+    if(!p1||!p2)return false;
+    const dx=p2.x-p1.x,dy=p2.y-p1.y,len=Math.sqrt(dx*dx+dy*dy);
+    if(!len)return false;
+    const t=((x-p1.x)*dx+(y-p1.y)*dy)/(len*len);
+    if(t<0||t>1)return false;
+    return Math.sqrt(Math.pow(p1.x+t*dx-x,2)+Math.pow(p1.y+t*dy-y,2))<12;
+  });
+}
+
+function fsTap(e){
+  e.preventDefault();
+  const canvas=document.getElementById('fs-canvas');
+  const {x,y}=fsGetPos(e,canvas);
+  if(padMode==='post'){
+    padPosts.push({id:padPostCounter++,x,y});
+    fsDraw();fsUpdateStats();return;
   }
-
-  window.padResize=function(){
-    if(!canvas)return;
-    const wrap=canvas.parentElement;
-    W=wrap.clientWidth; H=300;
-    canvas.width=W; canvas.height=H;
-    draw();
-  };
-
-  function draw(){
-    if(!ctx)return;
-    ctx.clearRect(0,0,W,H);
-    // grid
-    ctx.strokeStyle='#f0f0ec'; ctx.lineWidth=1;
-    for(let x=0;x<W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
-    for(let y=0;y<H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
-    segments.forEach(s=>{
-      const p1=posts.find(p=>p.id===s.from), p2=posts.find(p=>p.id===s.to);
-      if(!p1||!p2)return;
-      ctx.beginPath();ctx.moveTo(p1.x,p1.y);ctx.lineTo(p2.x,p2.y);
-      ctx.strokeStyle='#378ADD';ctx.lineWidth=2.5;ctx.stroke();
-      const mx=(p1.x+p2.x)/2,my=(p1.y+p2.y)/2;
-      const angle=Math.atan2(p2.y-p1.y,p2.x-p1.x);
-      ctx.save();ctx.translate(mx,my);ctx.rotate(angle);
-      const label=(s.length!==null?s.length:'?')+'ft';
-      const tw=ctx.measureText(label).width+10;
-      ctx.fillStyle='#fafaf8';ctx.fillRect(-tw/2,-11,tw,18);
-      ctx.fillStyle='#378ADD';ctx.font='bold 12px sans-serif';
-      ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(label,0,0);
-      ctx.restore();
-    });
-    posts.forEach(p=>{
-      const sel=pendingFrom&&pendingFrom.id===p.id;
-      ctx.beginPath();ctx.rect(p.x-POST_R,p.y-POST_R,POST_R*2,POST_R*2);
-      ctx.fillStyle=sel?'#fffbf4':'#fafaf8';ctx.fill();
-      ctx.strokeStyle=sel?'#c8a96e':'#0f0f0f';ctx.lineWidth=2;ctx.stroke();
-      ctx.fillStyle='#0f0f0f';ctx.font='bold 10px sans-serif';
-      ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(p.id,p.x,p.y);
-    });
-  }
-
-  function getPos(e){
-    const rect=canvas.getBoundingClientRect();
-    const sx=canvas.width/rect.width, sy=canvas.height/rect.height;
-    if(e.touches)return{x:(e.touches[0].clientX-rect.left)*sx,y:(e.touches[0].clientY-rect.top)*sy};
-    return{x:(e.clientX-rect.left)*sx,y:(e.clientY-rect.top)*sy};
-  }
-
-  function hitPost(x,y){return posts.find(p=>Math.abs(p.x-x)<POST_R+5&&Math.abs(p.y-y)<POST_R+5);}
-
-  function hitSeg(x,y){
-    return segments.find(s=>{
-      const p1=posts.find(p=>p.id===s.from),p2=posts.find(p=>p.id===s.to);
-      if(!p1||!p2)return false;
-      const dx=p2.x-p1.x,dy=p2.y-p1.y,len=Math.sqrt(dx*dx+dy*dy);
-      if(!len)return false;
-      const t=((x-p1.x)*dx+(y-p1.y)*dy)/(len*len);
-      if(t<0||t>1)return false;
-      const px=p1.x+t*dx-x,py=p1.y+t*dy-y;
-      return Math.sqrt(px*px+py*py)<10;
-    });
-  }
-
-  function handleTap(e){
-    e.preventDefault();
-    const {x,y}=getPos(e);
-    if(mode==='post'){
-      posts.push({id:postCounter++,x,y});
-      draw();updateSummary();return;
-    }
-    if(mode==='connect'){
-      const hit=hitPost(x,y);
-      if(hit){
-        if(!pendingFrom){
-          pendingFrom=hit;
-          document.getElementById('pad-hint').textContent='Post '+hit.id+' selected — tap another post';
-          draw();
-        } else if(hit.id!==pendingFrom.id){
-          const exists=segments.find(s=>(s.from===pendingFrom.id&&s.to===hit.id)||(s.from===hit.id&&s.to===pendingFrom.id));
-          if(!exists){
-            pendingSegment={from:pendingFrom.id,to:hit.id,length:null};
-            segments.push(pendingSegment);draw();
-            document.getElementById('pad-len-input').value='';
-            document.getElementById('pad-modal-bg').classList.add('open');
-            setTimeout(()=>document.getElementById('pad-len-input').focus(),100);
-          } else {
-            document.getElementById('pad-hint').textContent='Already connected — tap a different post';
-            pendingFrom=null;draw();
-          }
+  if(padMode==='connect'){
+    const hit=fsHitPost(x,y);
+    if(hit){
+      if(!padPendingFrom){
+        padPendingFrom=hit;
+        setFsHint('Post '+hit.id+' selected — tap another post to connect');
+        fsDraw();
+      } else if(hit.id!==padPendingFrom.id){
+        const exists=padSegments.find(s=>(s.from===padPendingFrom.id&&s.to===hit.id)||(s.from===hit.id&&s.to===padPendingFrom.id));
+        if(!exists){
+          padPendingSegment={from:padPendingFrom.id,to:hit.id,length:null};
+          padSegments.push(padPendingSegment);fsDraw();
+          openPadLengthModal();
+        } else {
+          setFsHint('Already connected — tap a different post');
+          padPendingFrom=null;fsDraw();
         }
       }
-      return;
     }
-    if(mode==='delete'){
-      const hp=hitPost(x,y);
-      if(hp){posts=posts.filter(p=>p.id!==hp.id);segments=segments.filter(s=>s.from!==hp.id&&s.to!==hp.id);draw();updateSummary();return;}
-      const hs=hitSeg(x,y);
-      if(hs){segments=segments.filter(s=>s!==hs);draw();updateSummary();}
-    }
+    return;
   }
-
-  window.padConfirmLength=function(){
-    const v=parseFloat(document.getElementById('pad-len-input').value);
-    if(pendingSegment)pendingSegment.length=isNaN(v)||v<=0?null:v;
-    pendingFrom=null;pendingSegment=null;
-    document.getElementById('pad-modal-bg').classList.remove('open');
-    document.getElementById('pad-hint').textContent='Tap a post to start another section';
-    draw();updateSummary();
-  };
-
-  window.padCancelLength=function(){
-    if(pendingSegment)segments=segments.filter(s=>s!==pendingSegment);
-    pendingFrom=null;pendingSegment=null;
-    document.getElementById('pad-modal-bg').classList.remove('open');
-    draw();
-  };
-
-  window.padSetMode=function(m){
-    mode=m;pendingFrom=null;
-    document.querySelectorAll('.pad-btn').forEach(b=>b.classList.remove('active'));
-    document.getElementById('pad-btn-'+m)?.classList.add('active');
-    const hints={post:'Tap the canvas to place a post',connect:'Tap a post to start, then tap another to connect',delete:'Tap a post or line to remove it'};
-    document.getElementById('pad-hint').textContent=hints[m]||'';
-    draw();
-  };
-
-  window.padClearAll=function(){
-    posts=[];segments=[];postCounter=1;pendingFrom=null;pendingSegment=null;
-    draw();updateSummary();
-    document.getElementById('pad-hint').textContent='Tap the canvas to place a post';
-  };
-
-  window.padApply=function(){
-    const totalFt=segments.reduce((s,seg)=>s+(seg.length||0),0);
-    const nPosts=posts.length;
-    const spindles=segments.length*2;
-    const lfEl=document.getElementById('linear-ft');
-    lfEl.value=Math.round(totalFt*10)/10;lfEl.classList.add('ai-filled');
-    const pEl=document.getElementById('post-qty');
-    pEl.value=nPosts;pEl.classList.add('ai-filled');
-    const spEl=document.getElementById('spindle-qty');
-    spEl.value=spindles;spEl.classList.add('ai-filled');
-    calc();
-    showToast('Layout applied — '+totalFt.toFixed(1)+'ft, '+nPosts+' posts, '+spindles+' spindles');
-  };
-
-  function updateSummary(){
-    const totalFt=segments.reduce((s,seg)=>s+(seg.length||0),0);
-    const nPosts=posts.length;
-    const nSections=segments.length;
-    const spindles=nSections*2;
-    document.getElementById('pad-s-posts').textContent=nPosts;
-    document.getElementById('pad-s-sections').textContent=nSections;
-    document.getElementById('pad-s-total').textContent=totalFt.toFixed(1);
-    document.getElementById('pad-s-spindles').textContent=spindles;
-    const show=nPosts>0;
-    document.getElementById('pad-summary').style.display=show?'flex':'none';
-    document.getElementById('pad-apply-btn').style.display=nSections>0?'inline-flex':'none';
+  if(padMode==='delete'){
+    const hp=fsHitPost(x,y);
+    if(hp){padPosts=padPosts.filter(p=>p.id!==hp.id);padSegments=padSegments.filter(s=>s.from!==hp.id&&s.to!==hp.id);fsDraw();fsUpdateStats();return;}
+    const hs=fsHitSeg(x,y);
+    if(hs){padSegments=padSegments.filter(s=>s!==hs);fsDraw();fsUpdateStats();}
   }
+}
 
-  window.addEventListener('resize',window.padResize);
-  document.addEventListener('DOMContentLoaded',init);
-  setTimeout(init,100);
-})();
+function openPadLengthModal(){
+  document.getElementById('pad-len-input').value='';
+  document.getElementById('pad-modal-bg').classList.add('open');
+  setTimeout(()=>document.getElementById('pad-len-input').focus(),100);
+}
+
+window.padConfirmLength=function(){
+  const v=parseFloat(document.getElementById('pad-len-input').value);
+  if(padPendingSegment)padPendingSegment.length=isNaN(v)||v<=0?null:v;
+  padPendingFrom=null;padPendingSegment=null;
+  document.getElementById('pad-modal-bg').classList.remove('open');
+  setFsHint('Tap to place a post or connect more sections');
+  fsDraw();fsUpdateStats();
+};
+
+window.padCancelLength=function(){
+  if(padPendingSegment)padSegments=padSegments.filter(s=>s!==padPendingSegment);
+  padPendingFrom=null;padPendingSegment=null;
+  document.getElementById('pad-modal-bg').classList.remove('open');
+  fsDraw();
+};
+
+document.addEventListener('DOMContentLoaded',function(){
+  const li=document.getElementById('pad-len-input');
+  if(li){li.addEventListener('keydown',e=>{if(e.key==='Enter')padConfirmLength();if(e.key==='Escape')padCancelLength();});}
+  const fc=document.getElementById('fs-canvas');
+  if(fc){
+    fc.addEventListener('touchend',fsTap,{passive:false});
+    fc.addEventListener('click',fsTap);
+  }
+  window.addEventListener('resize',()=>{if(document.getElementById('fs-overlay').classList.contains('open'))fsResize();});
+});
+
+window.padSetMode=function(m,ctx){
+  padMode=m;padPendingFrom=null;
+  ['post','connect','delete'].forEach(id=>{
+    const b=document.getElementById('fs-btn-'+id);
+    if(b)b.classList.toggle('active',id===m);
+  });
+  const hints={post:'Tap to place a post',connect:'Tap a post to start, then tap another to connect',delete:'Tap a post or line to remove it'};
+  setFsHint(hints[m]||'');
+  fsDraw();
+};
+
+window.padClearAll=function(){
+  padPosts=[];padSegments=[];padPostCounter=1;padPendingFrom=null;padPendingSegment=null;
+  fsDraw();fsUpdateStats();
+  setFsHint('Tap to place a post');
+};
+
+function setFsHint(msg){
+  const el=document.getElementById('fs-hint');if(el)el.textContent=msg;
+}
+
+function fsUpdateStats(){
+  const totalFt=padSegments.reduce((s,seg)=>s+(seg.length||0),0);
+  const nPosts=padPosts.length;
+  const nSections=padSegments.length;
+  const spindles=nSections*2;
+  ['fs-s-posts','pad-s-posts'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=nPosts;});
+  ['fs-s-sections','pad-s-sections'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=nSections;});
+  ['fs-s-total','pad-s-total'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=totalFt.toFixed(1);});
+  ['fs-s-spindles','pad-s-spindles'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=spindles;});
+  const showSummary=nPosts>0;
+  const showApply=nSections>0;
+  ['pad-summary'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display=showSummary?'flex':'none';});
+  ['pad-apply-btn','fs-apply-btn'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display=showApply?'inline-flex':'none';});
+}
+
+function updatePadSummary(){fsUpdateStats();}
+
+window.padApply=function(){
+  const totalFt=padSegments.reduce((s,seg)=>s+(seg.length||0),0);
+  const nPosts=padPosts.length;
+  const spindles=padSegments.length*2;
+  const lfEl=document.getElementById('linear-ft');
+  if(lfEl){lfEl.value=Math.round(totalFt*10)/10;lfEl.classList.add('ai-filled');}
+  const pEl=document.getElementById('post-qty');
+  if(pEl){pEl.value=nPosts;pEl.classList.add('ai-filled');}
+  const spEl=document.getElementById('spindle-qty');
+  if(spEl){spEl.value=spindles;spEl.classList.add('ai-filled');}
+  closeFsDrawing();
+  calc();
+  showToast('Layout applied — '+totalFt.toFixed(1)+'ft, '+nPosts+' posts, '+spindles+' spindles');
+};
+
 
 function toggleProducts(){
   const body=document.getElementById('products-body');
@@ -986,5 +1018,31 @@ function resetAll(){
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
 renderSaved();
 </script>
+
+<div class="fs-overlay" id="fs-overlay">
+  <div class="fs-header">
+    <span class="fs-title">Draw layout</span>
+    <button class="pad-btn" onclick="closeFsDrawing()" style="height:32px;padding:0 12px">Done</button>
+  </div>
+  <div class="fs-toolbar">
+    <button class="pad-btn active" id="fs-btn-post" onclick="padSetMode('post','fs')">Place post</button>
+    <button class="pad-btn" id="fs-btn-connect" onclick="padSetMode('connect','fs')">Connect</button>
+    <button class="pad-btn" id="fs-btn-delete" onclick="padSetMode('delete','fs')">Delete</button>
+    <button class="pad-btn danger" onclick="padClearAll('fs')">Clear</button>
+  </div>
+  <div class="fs-hint" id="fs-hint">Tap to place a post</div>
+  <div class="fs-canvas-wrap" id="fs-canvas-wrap">
+    <canvas id="fs-canvas"></canvas>
+  </div>
+  <div class="fs-footer">
+    <div class="fs-stats">
+      <div class="fs-stat">Posts<span id="fs-s-posts">0</span></div>
+      <div class="fs-stat">Sections<span id="fs-s-sections">0</span></div>
+      <div class="fs-stat">Linear ft<span id="fs-s-total">0</span></div>
+      <div class="fs-stat">Spindles<span id="fs-s-spindles">0</span></div>
+    </div>
+    <button class="btn btn-accent" id="fs-apply-btn" style="display:none;height:36px;padding:0 16px;font-size:13px" onclick="padApply()">Apply to form</button>
+  </div>
+</div>
 </body>
 </html>
