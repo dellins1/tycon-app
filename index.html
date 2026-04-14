@@ -444,10 +444,28 @@
         <span class="product-label" style="width:100%;margin-bottom:.25rem">Column</span>
         <select class="product-select" id="p-col-size" onchange="calc()">
           <option value="">— select size —</option>
-          <option value="270">6&quot; 9ft — $270</option>
-          <option value="285">6&quot; 12ft — $285</option>
-          <option value="295">7.25&quot; 9ft — $295</option>
-          <option value="330">7.25&quot; 12ft — $330</option>
+          <optgroup label="Column">
+            <option value="270">6&quot; 9ft — $270</option>
+            <option value="285">6&quot; 12ft — $285</option>
+            <option value="295">7.25&quot; 9ft — $295</option>
+            <option value="330">7.25&quot; 12ft — $330</option>
+          </optgroup>
+          <optgroup label="Double Post 2&quot;x2&quot;">
+            <option value="250">Double 9ft — $250</option>
+            <option value="270">Double 10ft — $270</option>
+          </optgroup>
+          <optgroup label="Double Post 3&quot;x3&quot;">
+            <option value="260">Double 3x3 9ft — $260</option>
+            <option value="280">Double 3x3 10ft — $280</option>
+          </optgroup>
+          <optgroup label="Triple Post 2x2">
+            <option value="360">Triple 2x2 9ft — $360</option>
+            <option value="380">Triple 2x2 10ft — $380</option>
+          </optgroup>
+          <optgroup label="Triple Post 3x3">
+            <option value="370">Triple 3x3 9ft — $370</option>
+            <option value="390">Triple 3x3 10ft — $390</option>
+          </optgroup>
         </select>
         <input type="number" class="product-qty" id="p-col-qty" min="0" placeholder="qty" oninput="calc()" style="width:60px">
         <span class="product-subtotal" id="ps-col"></span>
