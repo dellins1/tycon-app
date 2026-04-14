@@ -724,7 +724,7 @@ function closeFsDrawing(){
 }
 
 /* ── Shared Drawing Pad State ── */
-var padPosts=[], padSegments=[], padColumns=[], padMode='post', padPendingFrom=null, padPendingSegment=null, padPostCounter=1;
+var padPosts=[], padSegments=[], padColumns=[], padMode='post', padPendingFrom=null, padPendingSegment=null, padPostCounter=1, padColCounter=1;
 var fsCanvas, fsCtx, fsW, fsH;
 const PAD_POST_R=12;
 
@@ -749,7 +749,8 @@ function fsDraw(){
   for(let y=0;y<fsH;y+=50){fsCtx.beginPath();fsCtx.moveTo(0,y);fsCtx.lineTo(fsW,y);fsCtx.stroke();}
   // segments
   padSegments.forEach(s=>{
-    const p1=padPosts.find(p=>p.id===s.from), p2=padPosts.find(p=>p.id===s.to);
+    const p1=padPosts.find(p=>p.id===s.from)||padColumns.find(c=>c.id===s.from);
+    const p2=padPosts.find(p=>p.id===s.to)||padColumns.find(c=>c.id===s.to);
     if(!p1||!p2)return;
     fsCtx.beginPath();fsCtx.moveTo(p1.x,p1.y);fsCtx.lineTo(p2.x,p2.y);
     fsCtx.strokeStyle='#378ADD';fsCtx.lineWidth=3;fsCtx.stroke();
@@ -767,10 +768,11 @@ function fsDraw(){
   });
   // columns (circles)
   padColumns.forEach(c=>{
+    const sel=padPendingFrom&&padPendingFrom.id===c.id;
     fsCtx.beginPath();fsCtx.arc(c.x,c.y,PAD_POST_R,0,Math.PI*2);
-    fsCtx.fillStyle='#fafaf8';fsCtx.fill();
-    fsCtx.strokeStyle='#993C1D';fsCtx.lineWidth=2.5;fsCtx.stroke();
-    fsCtx.fillStyle='#993C1D';fsCtx.font='bold 10px sans-serif';
+    fsCtx.fillStyle=sel?'#fffbf4':'#fafaf8';fsCtx.fill();
+    fsCtx.strokeStyle=sel?'#c8a96e':'#993C1D';fsCtx.lineWidth=2.5;fsCtx.stroke();
+    fsCtx.fillStyle=sel?'#c8a96e':'#993C1D';fsCtx.font='bold 10px sans-serif';
     fsCtx.textAlign='center';fsCtx.textBaseline='middle';fsCtx.fillText('C',c.x,c.y);
   });
   // posts
@@ -797,7 +799,8 @@ function fsHitColumn(x,y){return padColumns.find(c=>Math.sqrt(Math.pow(c.x-x,2)+
 
 function fsHitSeg(x,y){
   return padSegments.find(s=>{
-    const p1=padPosts.find(p=>p.id===s.from),p2=padPosts.find(p=>p.id===s.to);
+    const p1=padPosts.find(p=>p.id===s.from)||padColumns.find(c=>c.id===s.from);
+    const p2=padPosts.find(p=>p.id===s.to)||padColumns.find(c=>c.id===s.to);
     if(!p1||!p2)return false;
     const dx=p2.x-p1.x,dy=p2.y-p1.y,len=Math.sqrt(dx*dx+dy*dy);
     if(!len)return false;
@@ -816,15 +819,18 @@ function fsTap(e){
     fsDraw();fsUpdateStats();return;
   }
   if(padMode==='column'){
-    padColumns.push({x,y});
+    padColumns.push({id:'C'+padColCounter++,x,y});
     fsDraw();return;
   }
   if(padMode==='connect'){
-    const hit=fsHitPost(x,y);
+    const hitP=fsHitPost(x,y);
+    const hitC=fsHitColumn(x,y);
+    const hit=hitP||hitC;
     if(hit){
       if(!padPendingFrom){
         padPendingFrom=hit;
-        setFsHint('Post '+hit.id+' selected — tap another post to connect');
+        const label=hitC?'Column '+hit.id:'Post '+hit.id;
+        setFsHint(label+' selected — tap a post or column to connect');
         fsDraw();
       } else if(hit.id!==padPendingFrom.id){
         const exists=padSegments.find(s=>(s.from===padPendingFrom.id&&s.to===hit.id)||(s.from===hit.id&&s.to===padPendingFrom.id));
@@ -833,7 +839,7 @@ function fsTap(e){
           padSegments.push(padPendingSegment);fsDraw();
           openPadLengthModal();
         } else {
-          setFsHint('Already connected — tap a different post');
+          setFsHint('Already connected — tap a different one');
           padPendingFrom=null;fsDraw();
         }
       }
@@ -842,7 +848,7 @@ function fsTap(e){
   }
   if(padMode==='delete'){
     const hc=fsHitColumn(x,y);
-    if(hc){padColumns=padColumns.filter(c=>c!==hc);fsDraw();return;}
+    if(hc){padColumns=padColumns.filter(c=>c!==hc);padSegments=padSegments.filter(s=>s.from!==hc.id&&s.to!==hc.id);fsDraw();fsUpdateStats();return;}
     const hp=fsHitPost(x,y);
     if(hp){padPosts=padPosts.filter(p=>p.id!==hp.id);padSegments=padSegments.filter(s=>s.from!==hp.id&&s.to!==hp.id);fsDraw();fsUpdateStats();return;}
     const hs=fsHitSeg(x,y);
@@ -895,7 +901,7 @@ window.padSetMode=function(m,ctx){
 };
 
 window.padClearAll=function(){
-  padPosts=[];padSegments=[];padColumns=[];padPostCounter=1;padPendingFrom=null;padPendingSegment=null;
+  padPosts=[];padSegments=[];padColumns=[];padPostCounter=1;padColCounter=1;padPendingFrom=null;padPendingSegment=null;
   fsDraw();fsUpdateStats();
   setFsHint('Tap to place a post');
 };
