@@ -359,6 +359,30 @@
         <span class="product-subtotal" id="ps-pegleg"></span>
       </div>
 
+      <!-- Angle Adapter — flat, no qty -->
+      <div class="product-row">
+        <span class="product-label">Angle adapter</span>
+        <span class="product-price">$50 each</span>
+        <input type="number" class="product-qty" id="p-angle-adapter" min="0" placeholder="0" oninput="calc()">
+        <span class="product-subtotal" id="ps-angle-adapter"></span>
+      </div>
+
+      <!-- Handrail — per ft -->
+      <div class="product-row">
+        <span class="product-label">Handrail</span>
+        <span class="product-price">$18/ft</span>
+        <input type="number" class="product-qty" id="p-handrail" min="0" placeholder="0" oninput="calc()">
+        <span class="product-subtotal" id="ps-handrail"></span>
+      </div>
+
+      <!-- Handrail Brackets — qty -->
+      <div class="product-row">
+        <span class="product-label">Handrail brackets</span>
+        <span class="product-price">$11 each</span>
+        <input type="number" class="product-qty" id="p-handrail-brackets" min="0" placeholder="0" oninput="calc()">
+        <span class="product-subtotal" id="ps-handrail-brackets"></span>
+      </div>
+
       <!-- Columns — size dropdown + qty -->
       <div class="product-row" style="flex-wrap:wrap;gap:.5rem">
         <span class="product-label" style="width:100%;margin-bottom:.25rem">Column</span>
@@ -838,12 +862,15 @@ function calc(){
 
   // Products
   const products=[
-    {id:'gate-addon', price:90, label:'Gate addon'},
-    {id:'sc-gate',    price:95, label:'Self closing gate'},
-    {id:'reg-gate',   price:85, label:'Regular gate'},
-    {id:'stair',      price:25, label:'Stair template'},
-    {id:'ballcaps',   price:25, label:'Ball caps'},
-    {id:'pegleg',     price:5.5,label:'Peg leg'},
+    {id:'gate-addon',        price:90,  label:'Gate addon'},
+    {id:'sc-gate',           price:95,  label:'Self closing gate'},
+    {id:'reg-gate',          price:85,  label:'Regular gate'},
+    {id:'stair',             price:25,  label:'Stair template'},
+    {id:'ballcaps',          price:25,  label:'Ball caps'},
+    {id:'pegleg',            price:5.5, label:'Peg leg'},
+    {id:'angle-adapter',     price:50,  label:'Angle adapter'},
+    {id:'handrail',          price:18,  label:'Handrail'},
+    {id:'handrail-brackets', price:11,  label:'Handrail brackets'},
   ];
   let productTotal=0;
   products.forEach(p=>{
@@ -878,7 +905,7 @@ function calc(){
   rows+=`<div class="total-row"><span class="label">Total</span><span class="val">${fmt(total)}</span></div>`;
   document.getElementById('breakdown-body').innerHTML=rows;
   lastTotal=total;
-  const prodSnap={gateAddon:parseFloat(document.getElementById('p-gate-addon').value)||0,scGate:parseFloat(document.getElementById('p-sc-gate').value)||0,regGate:parseFloat(document.getElementById('p-reg-gate').value)||0,stair:parseFloat(document.getElementById('p-stair').value)||0,ballcaps:parseFloat(document.getElementById('p-ballcaps').value)||0,pegleg:parseFloat(document.getElementById('p-pegleg').value)||0,colSize:document.getElementById('p-col-size').value,colQty:parseFloat(document.getElementById('p-col-qty').value)||0};
+  const prodSnap={gateAddon:parseFloat(document.getElementById('p-gate-addon').value)||0,scGate:parseFloat(document.getElementById('p-sc-gate').value)||0,regGate:parseFloat(document.getElementById('p-reg-gate').value)||0,stair:parseFloat(document.getElementById('p-stair').value)||0,ballcaps:parseFloat(document.getElementById('p-ballcaps').value)||0,pegleg:parseFloat(document.getElementById('p-pegleg').value)||0,angleAdapter:parseFloat(document.getElementById('p-angle-adapter').value)||0,handrail:parseFloat(document.getElementById('p-handrail').value)||0,handrailBrackets:parseFloat(document.getElementById('p-handrail-brackets').value)||0,colSize:document.getElementById('p-col-size').value,colQty:parseFloat(document.getElementById('p-col-qty').value)||0};
   lastSnapshot={colour,handrail,install,railCode,height,linFt,postSize,postQty,spType,spQty,total,products:prodSnap};
 }
 
@@ -958,6 +985,9 @@ function loadQuoteForEdit(id){
     if(p.pegleg)document.getElementById('p-pegleg').value=p.pegleg;
     if(p.colSize)document.getElementById('p-col-size').value=p.colSize;
     if(p.colQty)document.getElementById('p-col-qty').value=p.colQty;
+    if(p.angleAdapter)document.getElementById('p-angle-adapter').value=p.angleAdapter;
+    if(p.handrail)document.getElementById('p-handrail').value=p.handrail;
+    if(p.handrailBrackets)document.getElementById('p-handrail-brackets').value=p.handrailBrackets;
   }
   // Update save button to show "Update quote"
   document.getElementById('save-btn').textContent='Update quote';
@@ -1014,7 +1044,7 @@ function resetAll(){
   document.getElementById('save-btn').textContent='Save quote';
   document.getElementById('editing-banner').style.display='none';
   ['colour','handrail','railing-type','railing-height','post-size','spindle-type','p-col-size'].forEach(id=>document.getElementById(id).selectedIndex=0);
-  ['install-cost','linear-ft','post-qty','spindle-qty','p-gate-addon','p-sc-gate','p-reg-gate','p-stair','p-ballcaps','p-pegleg','p-col-qty'].forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.classList.remove('ai-filled');}});
+  ['install-cost','linear-ft','post-qty','spindle-qty','p-gate-addon','p-sc-gate','p-reg-gate','p-stair','p-ballcaps','p-pegleg','p-angle-adapter','p-handrail','p-handrail-brackets','p-col-qty'].forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.classList.remove('ai-filled');}});
   clearPhoto();calc();
 }
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
