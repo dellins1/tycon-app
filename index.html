@@ -182,6 +182,18 @@
   .filter-btn{padding:4px 12px;font-size:12px;border:1px solid var(--grey-200);border-radius:20px;background:transparent;cursor:pointer;color:var(--grey-400);font-family:'DM Sans',sans-serif;transition:all .15s}
   .filter-btn:hover{border-color:var(--grey-400);color:var(--black)}
   .filter-btn.active{background:var(--black);color:var(--white);border-color:var(--black)}
+
+  /* PDF overlay */
+  .pdf-overlay{display:none;position:fixed;inset:0;background:#f5f5f3;z-index:9998;flex-direction:column}
+  .pdf-overlay.open{display:flex}
+  .pdf-header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;background:var(--black);color:var(--white);flex-shrink:0}
+  .pdf-header-title{font-size:.85rem;font-weight:500}
+  .pdf-header-btns{display:flex;gap:8px}
+  .pdf-hbtn{height:32px;padding:0 14px;border-radius:var(--radius);font-size:12px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;border:none}
+  .pdf-hbtn-close{background:#333;color:var(--white)}
+  .pdf-hbtn-print{background:var(--accent);color:var(--black)}
+  .pdf-body{flex:1;overflow-y:auto;padding:1.5rem 1rem}
+  .pdf-doc{background:#fff;max-width:680px;margin:0 auto;padding:32px;border-radius:var(--radius-lg);box-shadow:0 2px 12px rgba(0,0,0,.08)}
   .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--black);color:var(--white);padding:.75rem 1.25rem;border-radius:var(--radius-lg);font-size:.85rem;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;z-index:999}
   .toast.show{opacity:1;transform:translateY(0)}
 </style>
@@ -1284,13 +1296,41 @@ function exportPDF(){
   <div style="border-top:1px solid #e8e8e4;padding-top:20px;font-size:12px;color:#aaa;text-align:center">
     This quote is valid for 30 days. Thank you for choosing Tycon Railings.
   </div>
+
+<div class="pdf-overlay" id="pdf-overlay">
+  <div class="pdf-header">
+    <span class="pdf-header-title">Quote preview</span>
+    <div class="pdf-header-btns">
+      <button class="pdf-hbtn pdf-hbtn-print" onclick="printPDF()">Print / Save PDF</button>
+      <button class="pdf-hbtn pdf-hbtn-close" onclick="closePDF()">Close</button>
+    </div>
+  </div>
+  <div class="pdf-body">
+    <div class="pdf-doc" id="pdf-doc"></div>
+  </div>
+</div>
 </body>
 </html>`;
 
-  const win=window.open('','_blank');
-  win.document.write(pdfHTML);
+  // Extract just the body content from pdfHTML for the overlay
+  const bodyMatch=pdfHTML.match(/<body>([\s\S]*)<\/body>/);
+  const bodyContent=bodyMatch?bodyMatch[1]:pdfHTML;
+  document.getElementById('pdf-doc').innerHTML=bodyContent;
+  document.getElementById('pdf-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+  window._pdfHTML=pdfHTML;
+}
+
+function closePDF(){
+  document.getElementById('pdf-overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+function printPDF(){
+  const win=window.open('','_blank','width=800,height=600');
+  win.document.write(window._pdfHTML);
   win.document.close();
-  setTimeout(()=>win.print(),600);
+  setTimeout(()=>{win.print();},600);
 }
 
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
@@ -1330,6 +1370,19 @@ renderSaved();
       <div class="fs-stat">Spindles<span id="fs-s-spindles">0</span></div>
     </div>
     <button class="btn btn-accent" id="fs-apply-btn" style="display:none;height:36px;padding:0 16px;font-size:13px" onclick="padApply()">Apply to form</button>
+  </div>
+</div>
+
+<div class="pdf-overlay" id="pdf-overlay">
+  <div class="pdf-header">
+    <span class="pdf-header-title">Quote preview</span>
+    <div class="pdf-header-btns">
+      <button class="pdf-hbtn pdf-hbtn-print" onclick="printPDF()">Print / Save PDF</button>
+      <button class="pdf-hbtn pdf-hbtn-close" onclick="closePDF()">Close</button>
+    </div>
+  </div>
+  <div class="pdf-body">
+    <div class="pdf-doc" id="pdf-doc"></div>
   </div>
 </div>
 </body>
