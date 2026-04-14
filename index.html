@@ -293,15 +293,15 @@
       <div class="grid grid-3">
         <div class="fgroup" style="grid-column:1/-1">
           <label>Customer name</label>
-          <input type="text" id="customer-name" placeholder="Jane Smith" style="font-size:16px">
+          <input type="text" id="customer-name" placeholder="Jane Smith" style="font-size:16px" oninput="calc()">
         </div>
         <div class="fgroup">
           <label>Phone number</label>
-          <input type="tel" id="customer-phone" placeholder="416-555-0100" style="font-size:16px">
+          <input type="tel" id="customer-phone" placeholder="416-555-0100" style="font-size:16px" oninput="calc()">
         </div>
         <div class="fgroup" style="grid-column:2/4">
           <label>Status</label>
-          <select id="job-status" onchange="updateStatusBadge()">
+          <select id="job-status" onchange="updateStatusBadge();calc()">
             <option value="Lead">Lead</option>
             <option value="Quoted">Quoted</option>
             <option value="Scheduled">Scheduled</option>
@@ -310,11 +310,11 @@
         </div>
         <div class="fgroup" style="grid-column:1/-1">
           <label>Job address</label>
-          <input type="text" id="customer-address" placeholder="123 Main St, Vaughan, ON" style="font-size:16px">
+          <input type="text" id="customer-address" placeholder="123 Main St, Vaughan, ON" style="font-size:16px" oninput="calc()">
         </div>
         <div class="fgroup" style="grid-column:1/-1">
           <label>Notes</label>
-          <textarea id="job-notes" placeholder="e.g. concrete mount, stair section on left, customer prefers black..." style="width:100%;min-height:72px;padding:8px 10px;border:1px solid var(--grey-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:16px;color:var(--black);background:var(--white);resize:vertical;line-height:1.5"></textarea>
+          <textarea id="job-notes" placeholder="e.g. concrete mount, stair section on left, customer prefers black..." oninput="calc()" style="width:100%;min-height:72px;padding:8px 10px;border:1px solid var(--grey-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:16px;color:var(--black);background:var(--white);resize:vertical;line-height:1.5"></textarea>
         </div>
       </div>
     </div>
@@ -1040,7 +1040,12 @@ function saveQuote(){
     const idx=savedQuotes.findIndex(q=>q.id===editingId);
     if(idx>-1){
       const existing=savedQuotes[idx];
-      savedQuotes[idx]={...lastSnapshot,name:existing.name,date:existing.date,id:existing.id,photo:photoData||existing.photo};
+      const freshStatus=document.getElementById('job-status').value;
+      const freshName=document.getElementById('customer-name').value.trim();
+      const freshPhone=document.getElementById('customer-phone').value.trim();
+      const freshAddress=document.getElementById('customer-address').value.trim();
+      const freshNotes=document.getElementById('job-notes').value.trim();
+      savedQuotes[idx]={...lastSnapshot,jobStatus:freshStatus,customerName:freshName,customerPhone:freshPhone,customerAddress:freshAddress,jobNotes:freshNotes,name:existing.name,date:existing.date,id:existing.id,photo:photoData||existing.photo};
       localStorage.setItem('tycon_quotes',JSON.stringify(savedQuotes));
       editingId=null;
       document.getElementById('save-btn').textContent='Save quote';
