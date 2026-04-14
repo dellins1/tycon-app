@@ -724,7 +724,7 @@ function closeFsDrawing(){
 }
 
 /* ── Shared Drawing Pad State ── */
-var padPosts=[], padSegments=[], padMode='post', padPendingFrom=null, padPendingSegment=null, padPostCounter=1;
+var padPosts=[], padSegments=[], padColumns=[], padMode='post', padPendingFrom=null, padPendingSegment=null, padPostCounter=1;
 var fsCanvas, fsCtx, fsW, fsH;
 const PAD_POST_R=12;
 
@@ -765,6 +765,14 @@ function fsDraw(){
     fsCtx.textAlign='center';fsCtx.textBaseline='middle';fsCtx.fillText(label,0,0);
     fsCtx.restore();
   });
+  // columns (circles)
+  padColumns.forEach(c=>{
+    fsCtx.beginPath();fsCtx.arc(c.x,c.y,PAD_POST_R,0,Math.PI*2);
+    fsCtx.fillStyle='#fafaf8';fsCtx.fill();
+    fsCtx.strokeStyle='#993C1D';fsCtx.lineWidth=2.5;fsCtx.stroke();
+    fsCtx.fillStyle='#993C1D';fsCtx.font='bold 10px sans-serif';
+    fsCtx.textAlign='center';fsCtx.textBaseline='middle';fsCtx.fillText('C',c.x,c.y);
+  });
   // posts
   padPosts.forEach(p=>{
     const sel=padPendingFrom&&padPendingFrom.id===p.id;
@@ -785,6 +793,8 @@ function fsGetPos(e,canvas){
 
 function fsHitPost(x,y){return padPosts.find(p=>Math.abs(p.x-x)<PAD_POST_R+6&&Math.abs(p.y-y)<PAD_POST_R+6);}
 
+function fsHitColumn(x,y){return padColumns.find(c=>Math.sqrt(Math.pow(c.x-x,2)+Math.pow(c.y-y,2))<PAD_POST_R+6);}
+
 function fsHitSeg(x,y){
   return padSegments.find(s=>{
     const p1=padPosts.find(p=>p.id===s.from),p2=padPosts.find(p=>p.id===s.to);
@@ -804,6 +814,10 @@ function fsTap(e){
   if(padMode==='post'){
     padPosts.push({id:padPostCounter++,x,y});
     fsDraw();fsUpdateStats();return;
+  }
+  if(padMode==='column'){
+    padColumns.push({x,y});
+    fsDraw();return;
   }
   if(padMode==='connect'){
     const hit=fsHitPost(x,y);
@@ -827,6 +841,8 @@ function fsTap(e){
     return;
   }
   if(padMode==='delete'){
+    const hc=fsHitColumn(x,y);
+    if(hc){padColumns=padColumns.filter(c=>c!==hc);fsDraw();return;}
     const hp=fsHitPost(x,y);
     if(hp){padPosts=padPosts.filter(p=>p.id!==hp.id);padSegments=padSegments.filter(s=>s.from!==hp.id&&s.to!==hp.id);fsDraw();fsUpdateStats();return;}
     const hs=fsHitSeg(x,y);
@@ -869,17 +885,17 @@ document.addEventListener('DOMContentLoaded',function(){
 
 window.padSetMode=function(m,ctx){
   padMode=m;padPendingFrom=null;
-  ['post','connect','delete'].forEach(id=>{
+  ['post','column','connect','delete'].forEach(id=>{
     const b=document.getElementById('fs-btn-'+id);
     if(b)b.classList.toggle('active',id===m);
   });
-  const hints={post:'Tap to place a post',connect:'Tap a post to start, then tap another to connect',delete:'Tap a post or line to remove it'};
+  const hints={post:'Tap to place a post',column:'Tap to place a column (visual only, not counted as a post)',connect:'Tap a post to start, then tap another to connect',delete:'Tap a post, column or line to remove it'};
   setFsHint(hints[m]||'');
   fsDraw();
 };
 
 window.padClearAll=function(){
-  padPosts=[];padSegments=[];padPostCounter=1;padPendingFrom=null;padPendingSegment=null;
+  padPosts=[];padSegments=[];padColumns=[];padPostCounter=1;padPendingFrom=null;padPendingSegment=null;
   fsDraw();fsUpdateStats();
   setFsHint('Tap to place a post');
 };
@@ -1362,6 +1378,7 @@ renderSaved();
   </div>
   <div class="fs-toolbar">
     <button class="pad-btn active" id="fs-btn-post" onclick="padSetMode('post','fs')">Place post</button>
+    <button class="pad-btn" id="fs-btn-column" onclick="padSetMode('column','fs')">Place column</button>
     <button class="pad-btn" id="fs-btn-connect" onclick="padSetMode('connect','fs')">Connect</button>
     <button class="pad-btn" id="fs-btn-delete" onclick="padSetMode('delete','fs')">Delete</button>
     <button class="pad-btn danger" onclick="padClearAll('fs')">Clear</button>
