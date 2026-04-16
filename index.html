@@ -724,7 +724,7 @@ function closeFsDrawing(){
 }
 
 /* ── Shared Drawing Pad State ── */
-var padPosts=[], padSegments=[], padColumns=[], padMode='post', padPendingFrom=null, padPendingSegment=null, padPostCounter=1, padColCounter=1;
+var padPosts=[], padSegments=[], padColumns=[], padWallLines=[], padMode='post', padPendingFrom=null, padPendingSegment=null, padPostCounter=1, padColCounter=1, padWallStart=null, padPendingWall=null;
 var fsCanvas, fsCtx, fsW, fsH;
 const PAD_POST_R=12;
 
@@ -748,6 +748,39 @@ function fsDraw(){
   for(let x=0;x<fsW;x+=50){fsCtx.beginPath();fsCtx.moveTo(x,0);fsCtx.lineTo(x,fsH);fsCtx.stroke();}
   for(let y=0;y<fsH;y+=50){fsCtx.beginPath();fsCtx.moveTo(0,y);fsCtx.lineTo(fsW,y);fsCtx.stroke();}
   // segments
+  // wall sections (free-floating, dashed)
+  padWallLines.forEach(w=>{
+    fsCtx.save();
+    fsCtx.setLineDash([8,5]);
+    fsCtx.beginPath();fsCtx.moveTo(w.x1,w.y1);fsCtx.lineTo(w.x2,w.y2);
+    fsCtx.strokeStyle='#854F0B';fsCtx.lineWidth=2.5;fsCtx.stroke();
+    fsCtx.setLineDash([]);
+    // wall end markers
+    [[w.x1,w.y1],[w.x2,w.y2]].forEach(([ex,ey])=>{
+      fsCtx.beginPath();fsCtx.moveTo(ex-8,ey-8);fsCtx.lineTo(ex+8,ey+8);
+      fsCtx.moveTo(ex+8,ey-8);fsCtx.lineTo(ex-8,ey+8);
+      fsCtx.strokeStyle='#854F0B';fsCtx.lineWidth=2;fsCtx.stroke();
+    });
+    // label
+    const mx=(w.x1+w.x2)/2,my=(w.y1+w.y2)/2;
+    let angle=Math.atan2(w.y2-w.y1,w.x2-w.x1);
+    if(angle>Math.PI/2)angle-=Math.PI;
+    if(angle<-Math.PI/2)angle+=Math.PI;
+    fsCtx.save();fsCtx.translate(mx,my);fsCtx.rotate(angle);
+    const label=(w.length!==null?w.length:'?')+'ft';
+    const tw=fsCtx.measureText(label).width+14;
+    fsCtx.fillStyle='#fafaf8';fsCtx.fillRect(-tw/2,-13,tw,22);
+    fsCtx.fillStyle='#854F0B';fsCtx.font='bold 13px sans-serif';
+    fsCtx.textAlign='center';fsCtx.textBaseline='middle';fsCtx.fillText(label,0,0);
+    fsCtx.restore();
+    fsCtx.restore();
+  });
+  // wall start preview dot
+  if(padMode==='wall'&&padWallStart){
+    fsCtx.beginPath();fsCtx.arc(padWallStart.x,padWallStart.y,5,0,Math.PI*2);
+    fsCtx.fillStyle='#854F0B';fsCtx.fill();
+  }
+
   padSegments.forEach(s=>{
     const p1=padPosts.find(p=>p.id===s.from)||padColumns.find(c=>c.id===s.from);
     const p2=padPosts.find(p=>p.id===s.to)||padColumns.find(c=>c.id===s.to);
@@ -797,6 +830,16 @@ function fsHitPost(x,y){return padPosts.find(p=>Math.abs(p.x-x)<PAD_POST_R+6&&Ma
 
 function fsHitColumn(x,y){return padColumns.find(c=>Math.sqrt(Math.pow(c.x-x,2)+Math.pow(c.y-y,2))<PAD_POST_R+6);}
 
+function fsHitWall(x,y){
+  return padWallLines.find(w=>{
+    const dx=w.x2-w.x1,dy=w.y2-w.y1,len=Math.sqrt(dx*dx+dy*dy);
+    if(!len)return false;
+    const t=((x-w.x1)*dx+(y-w.y1)*dy)/(len*len);
+    if(t<0||t>1)return false;
+    return Math.sqrt(Math.pow(w.x1+t*dx-x,2)+Math.pow(w.y1+t*dy-y,2))<12;
+  });
+}
+
 function fsHitSeg(x,y){
   return padSegments.find(s=>{
     const p1=padPosts.find(p=>p.id===s.from)||padColumns.find(c=>c.id===s.from);
@@ -821,6 +864,24 @@ function fsTap(e){
   if(padMode==='column'){
     padColumns.push({id:'C'+padColCounter++,x,y});
     fsDraw();return;
+  }
+  if(padMode==='wall'){
+    if(!padWallStart){
+      padWallStart={x,y};
+      setFsHint('Start point set — tap to place the end point');
+      fsDraw();
+    } else {
+      const w={x1:padWallStart.x,y1:padWallStart.y,x2:x,y2:y,length:null};
+      padWallLines.push(w);
+      padWallStart=null;
+      fsDraw();
+      // open length modal for this wall line
+      padPendingWall=w;
+      document.getElementById('pad-len-input').value='';
+      document.getElementById('pad-modal-bg').classList.add('open');
+      setTimeout(()=>document.getElementById('pad-len-input').focus(),100);
+    }
+    return;
   }
   if(padMode==='connect'){
     const hitP=fsHitPost(x,y);
@@ -847,6 +908,8 @@ function fsTap(e){
     return;
   }
   if(padMode==='delete'){
+    const hw=fsHitWall(x,y);
+    if(hw){padWallLines=padWallLines.filter(w=>w!==hw);fsDraw();fsUpdateStats();return;}
     const hc=fsHitColumn(x,y);
     if(hc){padColumns=padColumns.filter(c=>c!==hc);padSegments=padSegments.filter(s=>s.from!==hc.id&&s.to!==hc.id);fsDraw();fsUpdateStats();return;}
     const hp=fsHitPost(x,y);
@@ -864,16 +927,18 @@ function openPadLengthModal(){
 
 window.padConfirmLength=function(){
   const v=parseFloat(document.getElementById('pad-len-input').value);
-  if(padPendingSegment)padPendingSegment.length=isNaN(v)||v<=0?null:v;
+  if(padPendingSegment){padPendingSegment.length=isNaN(v)||v<=0?null:v;}
+  if(padPendingWall){padPendingWall.length=isNaN(v)||v<=0?null:v;padPendingWall=null;}
   padPendingFrom=null;padPendingSegment=null;
   document.getElementById('pad-modal-bg').classList.remove('open');
-  setFsHint('Tap to place a post or connect more sections');
+  setFsHint('Tap to continue drawing');
   fsDraw();fsUpdateStats();
 };
 
 window.padCancelLength=function(){
   if(padPendingSegment)padSegments=padSegments.filter(s=>s!==padPendingSegment);
-  padPendingFrom=null;padPendingSegment=null;
+  if(padPendingWall)padWallLines=padWallLines.filter(w=>w!==padPendingWall);
+  padPendingFrom=null;padPendingSegment=null;padPendingWall=null;
   document.getElementById('pad-modal-bg').classList.remove('open');
   fsDraw();
 };
@@ -890,18 +955,18 @@ document.addEventListener('DOMContentLoaded',function(){
 });
 
 window.padSetMode=function(m,ctx){
-  padMode=m;padPendingFrom=null;
-  ['post','column','connect','delete'].forEach(id=>{
+  padMode=m;padPendingFrom=null;padWallStart=null;
+  ['post','column','connect','wall','delete'].forEach(id=>{
     const b=document.getElementById('fs-btn-'+id);
     if(b)b.classList.toggle('active',id===m);
   });
-  const hints={post:'Tap to place a post',column:'Tap to place a column (visual only, not counted as a post)',connect:'Tap a post to start, then tap another to connect',delete:'Tap a post, column or line to remove it'};
+  const hints={post:'Tap to place a post',column:'Tap to place a column (visual only, not counted as a post)',connect:'Tap a post to start, then tap another to connect',wall:'Tap to set start point, tap again to set end point — then enter the length',delete:'Tap a post, column, or line to remove it'};
   setFsHint(hints[m]||'');
   fsDraw();
 };
 
 window.padClearAll=function(){
-  padPosts=[];padSegments=[];padColumns=[];padPostCounter=1;padColCounter=1;padPendingFrom=null;padPendingSegment=null;
+  padPosts=[];padSegments=[];padColumns=[];padWallLines=[];padPostCounter=1;padColCounter=1;padPendingFrom=null;padPendingSegment=null;padWallStart=null;padPendingWall=null;
   fsDraw();fsUpdateStats();
   setFsHint('Tap to place a post');
 };
@@ -911,7 +976,7 @@ function setFsHint(msg){
 }
 
 function fsUpdateStats(){
-  const totalFt=padSegments.reduce((s,seg)=>s+(seg.length||0),0);
+  const totalFt=padSegments.reduce((s,seg)=>s+(seg.length||0),0)+padWallLines.reduce((s,w)=>s+(w.length||0),0);
   const nPosts=padPosts.length;
   const nSections=padSegments.length;
   const spindles=nSections*2;
@@ -928,7 +993,7 @@ function fsUpdateStats(){
 function updatePadSummary(){fsUpdateStats();}
 
 window.padApply=function(){
-  const totalFt=padSegments.reduce((s,seg)=>s+(seg.length||0),0);
+  const totalFt=padSegments.reduce((s,seg)=>s+(seg.length||0),0)+padWallLines.reduce((s,w)=>s+(w.length||0),0);
   const nPosts=padPosts.length;
   const spindles=padSegments.length*2;
   const lfEl=document.getElementById('linear-ft');
@@ -1391,6 +1456,7 @@ renderSaved();
     <button class="pad-btn active" id="fs-btn-post" onclick="padSetMode('post','fs')">Place post</button>
     <button class="pad-btn" id="fs-btn-column" onclick="padSetMode('column','fs')">Place column</button>
     <button class="pad-btn" id="fs-btn-connect" onclick="padSetMode('connect','fs')">Connect</button>
+    <button class="pad-btn" id="fs-btn-wall" onclick="padSetMode('wall','fs')">Wall section</button>
     <button class="pad-btn" id="fs-btn-delete" onclick="padSetMode('delete','fs')">Delete</button>
     <button class="pad-btn danger" onclick="padClearAll('fs')">Clear</button>
   </div>
