@@ -748,31 +748,31 @@ function fsDraw(){
   for(let x=0;x<fsW;x+=50){fsCtx.beginPath();fsCtx.moveTo(x,0);fsCtx.lineTo(x,fsH);fsCtx.stroke();}
   for(let y=0;y<fsH;y+=50){fsCtx.beginPath();fsCtx.moveTo(0,y);fsCtx.lineTo(fsW,y);fsCtx.stroke();}
   // segments
-  // wall sections (free-floating, dashed)
+  // wall sections — same blue as connected sections, short tick at each end
   padWallLines.forEach(w=>{
-    fsCtx.save();
-    fsCtx.setLineDash([8,5]);
+    const angle=Math.atan2(w.y2-w.y1,w.x2-w.x1);
+    const perpX=Math.sin(angle)*10, perpY=-Math.cos(angle)*10;
+    // main line
     fsCtx.beginPath();fsCtx.moveTo(w.x1,w.y1);fsCtx.lineTo(w.x2,w.y2);
-    fsCtx.strokeStyle='#854F0B';fsCtx.lineWidth=2.5;fsCtx.stroke();
-    fsCtx.setLineDash([]);
-    // wall end markers
+    fsCtx.strokeStyle='#378ADD';fsCtx.lineWidth=3;fsCtx.stroke();
+    // short perpendicular tick at each end (wall marker)
     [[w.x1,w.y1],[w.x2,w.y2]].forEach(([ex,ey])=>{
-      fsCtx.beginPath();fsCtx.moveTo(ex-8,ey-8);fsCtx.lineTo(ex+8,ey+8);
-      fsCtx.moveTo(ex+8,ey-8);fsCtx.lineTo(ex-8,ey+8);
-      fsCtx.strokeStyle='#854F0B';fsCtx.lineWidth=2;fsCtx.stroke();
+      fsCtx.beginPath();
+      fsCtx.moveTo(ex-perpX,ey-perpY);
+      fsCtx.lineTo(ex+perpX,ey+perpY);
+      fsCtx.strokeStyle='#378ADD';fsCtx.lineWidth=2.5;fsCtx.stroke();
     });
-    // label
+    // label — same style as connected sections
     const mx=(w.x1+w.x2)/2,my=(w.y1+w.y2)/2;
-    let angle=Math.atan2(w.y2-w.y1,w.x2-w.x1);
-    if(angle>Math.PI/2)angle-=Math.PI;
-    if(angle<-Math.PI/2)angle+=Math.PI;
-    fsCtx.save();fsCtx.translate(mx,my);fsCtx.rotate(angle);
+    let labelAngle=angle;
+    if(labelAngle>Math.PI/2)labelAngle-=Math.PI;
+    if(labelAngle<-Math.PI/2)labelAngle+=Math.PI;
+    fsCtx.save();fsCtx.translate(mx,my);fsCtx.rotate(labelAngle);
     const label=(w.length!==null?w.length:'?')+'ft';
     const tw=fsCtx.measureText(label).width+14;
     fsCtx.fillStyle='#fafaf8';fsCtx.fillRect(-tw/2,-13,tw,22);
-    fsCtx.fillStyle='#854F0B';fsCtx.font='bold 13px sans-serif';
+    fsCtx.fillStyle='#185FA5';fsCtx.font='bold 13px sans-serif';
     fsCtx.textAlign='center';fsCtx.textBaseline='middle';fsCtx.fillText(label,0,0);
-    fsCtx.restore();
     fsCtx.restore();
   });
   // wall start preview dot
@@ -978,7 +978,7 @@ function setFsHint(msg){
 function fsUpdateStats(){
   const totalFt=padSegments.reduce((s,seg)=>s+(seg.length||0),0)+padWallLines.reduce((s,w)=>s+(w.length||0),0);
   const nPosts=padPosts.length;
-  const nSections=padSegments.length;
+  const nSections=padSegments.length+padWallLines.length;
   const spindles=nSections*2;
   ['fs-s-posts','pad-s-posts'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=nPosts;});
   ['fs-s-sections','pad-s-sections'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=nSections;});
@@ -995,7 +995,7 @@ function updatePadSummary(){fsUpdateStats();}
 window.padApply=function(){
   const totalFt=padSegments.reduce((s,seg)=>s+(seg.length||0),0)+padWallLines.reduce((s,w)=>s+(w.length||0),0);
   const nPosts=padPosts.length;
-  const spindles=padSegments.length*2;
+  const spindles=(padSegments.length+padWallLines.length)*2;
   const lfEl=document.getElementById('linear-ft');
   if(lfEl){lfEl.value=Math.round(totalFt*10)/10;lfEl.classList.add('ai-filled');}
   const pEl=document.getElementById('post-qty');
