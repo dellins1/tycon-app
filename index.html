@@ -724,7 +724,7 @@ function closeFsDrawing(){
 }
 
 /* ── Shared Drawing Pad State ── */
-var padPosts=[], padSegments=[], padColumns=[], padWallLines=[], padMode='post', padPendingFrom=null, padPendingSegment=null, padPostCounter=1, padColCounter=1, padWallStart=null, padPendingWall=null;
+var padPosts=[], padSegments=[], padColumns=[], padWallLines=[], padTextLabels=[], padMode='post', padPendingFrom=null, padPendingSegment=null, padPostCounter=1, padColCounter=1, padWallStart=null, padPendingWall=null;
 var fsCanvas, fsCtx, fsW, fsH;
 const PAD_POST_R=12;
 
@@ -775,6 +775,15 @@ function fsDraw(){
     fsCtx.textAlign='center';fsCtx.textBaseline='middle';fsCtx.fillText(label,0,0);
     fsCtx.restore();
   });
+  // text labels
+  padTextLabels.forEach(t=>{
+    fsCtx.font='14px sans-serif';
+    fsCtx.fillStyle='#0f0f0f';
+    fsCtx.textAlign='left';
+    fsCtx.textBaseline='top';
+    fsCtx.fillText(t.text,t.x,t.y);
+  });
+
   // wall start preview dot
   if(padMode==='wall'&&padWallStart){
     fsCtx.beginPath();fsCtx.arc(padWallStart.x,padWallStart.y,5,0,Math.PI*2);
@@ -830,6 +839,14 @@ function fsHitPost(x,y){return padPosts.find(p=>Math.abs(p.x-x)<PAD_POST_R+6&&Ma
 
 function fsHitColumn(x,y){return padColumns.find(c=>Math.sqrt(Math.pow(c.x-x,2)+Math.pow(c.y-y,2))<PAD_POST_R+6);}
 
+function fsHitTextLabel(x,y){
+  return padTextLabels.find(t=>{
+    fsCtx.font='14px sans-serif';
+    const w=fsCtx.measureText(t.text).width;
+    return x>=t.x-4&&x<=t.x+w+4&&y>=t.y-4&&y<=t.y+20;
+  });
+}
+
 function fsHitWall(x,y){
   return padWallLines.find(w=>{
     const dx=w.x2-w.x1,dy=w.y2-w.y1,len=Math.sqrt(dx*dx+dy*dy);
@@ -864,6 +881,14 @@ function fsTap(e){
   if(padMode==='column'){
     padColumns.push({id:'C'+padColCounter++,x,y});
     fsDraw();return;
+  }
+  if(padMode==='text'){
+    const txt=prompt('Enter text:');
+    if(txt&&txt.trim()){
+      padTextLabels.push({x,y,text:txt.trim()});
+      fsDraw();
+    }
+    return;
   }
   if(padMode==='wall'){
     if(!padWallStart){
@@ -908,6 +933,8 @@ function fsTap(e){
     return;
   }
   if(padMode==='delete'){
+    const htx=fsHitTextLabel(x,y);
+    if(htx){padTextLabels=padTextLabels.filter(t=>t!==htx);fsDraw();return;}
     const hw=fsHitWall(x,y);
     if(hw){padWallLines=padWallLines.filter(w=>w!==hw);fsDraw();fsUpdateStats();return;}
     const hc=fsHitColumn(x,y);
@@ -956,17 +983,17 @@ document.addEventListener('DOMContentLoaded',function(){
 
 window.padSetMode=function(m,ctx){
   padMode=m;padPendingFrom=null;padWallStart=null;
-  ['post','column','connect','wall','delete'].forEach(id=>{
+  ['post','column','connect','wall','text','delete'].forEach(id=>{
     const b=document.getElementById('fs-btn-'+id);
     if(b)b.classList.toggle('active',id===m);
   });
-  const hints={post:'Tap to place a post',column:'Tap to place a column (visual only, not counted as a post)',connect:'Tap a post to start, then tap another to connect',wall:'Tap to set start point, tap again to set end point — then enter the length',delete:'Tap a post, column, or line to remove it'};
+  const hints={post:'Tap to place a post',column:'Tap to place a column (visual only, not counted as a post)',connect:'Tap a post to start, then tap another to connect',wall:'Tap to set start point, tap again to set end point — then enter the length',text:'Tap anywhere to add a text note (e.g. stair angle, special instruction)',delete:'Tap a post, column, line, or text to remove it'};
   setFsHint(hints[m]||'');
   fsDraw();
 };
 
 window.padClearAll=function(){
-  padPosts=[];padSegments=[];padColumns=[];padWallLines=[];padPostCounter=1;padColCounter=1;padPendingFrom=null;padPendingSegment=null;padWallStart=null;padPendingWall=null;
+  padPosts=[];padSegments=[];padColumns=[];padWallLines=[];padTextLabels=[];padPostCounter=1;padColCounter=1;padPendingFrom=null;padPendingSegment=null;padWallStart=null;padPendingWall=null;
   fsDraw();fsUpdateStats();
   setFsHint('Tap to place a post');
 };
@@ -1077,7 +1104,8 @@ function calc(){
     total+=productTotal;
     rows+=`<div class="brow"><span class="label">Additional products</span><span class="val">${fmt(productTotal)}</span></div>`;
   }
-  rows+=`<div class="total-row"><span class="label">Total</span><span class="val">${fmt(total)}</span></div>`;
+  const roundedTotal=roundToNearest50(total);
+  rows+=`<div class="total-row"><span class="label">Total</span><span class="val">${fmt(roundedTotal)}</span></div>`;
   document.getElementById('breakdown-body').innerHTML=rows;
   lastTotal=total;
   const prodSnap={gateAddon:parseFloat(document.getElementById('p-gate-addon').value)||0,scGate:parseFloat(document.getElementById('p-sc-gate').value)||0,regGate:parseFloat(document.getElementById('p-reg-gate').value)||0,stair:parseFloat(document.getElementById('p-stair').value)||0,ballcaps:parseFloat(document.getElementById('p-ballcaps').value)||0,pegleg:parseFloat(document.getElementById('p-pegleg').value)||0,angleAdapter:parseFloat(document.getElementById('p-angle-adapter').value)||0,handrail:parseFloat(document.getElementById('p-handrail').value)||0,handrailBrackets:parseFloat(document.getElementById('p-handrail-brackets').value)||0,colSize:document.getElementById('p-col-size').value,colQty:parseFloat(document.getElementById('p-col-qty').value)||0};
@@ -1086,7 +1114,7 @@ function calc(){
   const customerAddress=document.getElementById('customer-address').value.trim();
   const jobNotes=document.getElementById('job-notes').value.trim();
   const jobStatus=document.getElementById('job-status').value;
-  lastSnapshot={colour,handrail,install,railCode,height,linFt,postSize,postQty,spType,spQty,total,products:prodSnap,customerName,customerPhone,customerAddress,jobNotes,jobStatus};
+  lastSnapshot={colour,handrail,install,railCode,height,linFt,postSize,postQty,spType,spQty,total:roundedTotal,products:prodSnap,customerName,customerPhone,customerAddress,jobNotes,jobStatus};
 }
 
 function saveQuote(){
@@ -1265,8 +1293,20 @@ function resetAll(){
   clearPhoto();calc();
 }
 
+function roundToNearest50(n){
+  const rem=n%50;
+  return rem<25?n-rem:n+(50-rem);
+}
 function exportPDF(){
   if(!lastSnapshot||lastTotal===0){showToast('Build a quote first before exporting.');return;}
+  // Capture drawing pad canvas if it has content
+  let padImageData=null;
+  if(padPosts.length>0||padWallLines.length>0){
+    const fc=document.getElementById('fs-canvas');
+    if(fc&&fc.width>0){
+      try{padImageData=fc.toDataURL('image/png');}catch(e){}
+    }
+  }
   const q=lastSnapshot;
   const date=new Date().toLocaleDateString('en-CA',{year:'numeric',month:'long',day:'numeric'});
   const quoteNum='TRC-'+Date.now().toString().slice(-6);
@@ -1457,6 +1497,7 @@ renderSaved();
     <button class="pad-btn" id="fs-btn-column" onclick="padSetMode('column','fs')">Place column</button>
     <button class="pad-btn" id="fs-btn-connect" onclick="padSetMode('connect','fs')">Connect</button>
     <button class="pad-btn" id="fs-btn-wall" onclick="padSetMode('wall','fs')">Wall section</button>
+    <button class="pad-btn" id="fs-btn-text" onclick="padSetMode('text','fs')">Add text</button>
     <button class="pad-btn" id="fs-btn-delete" onclick="padSetMode('delete','fs')">Delete</button>
     <button class="pad-btn danger" onclick="padClearAll('fs')">Clear</button>
   </div>
