@@ -1402,7 +1402,9 @@ function exportPDF(){
   const lineRows=lineItems.map(li=>`
     <tr>
       <td style="padding:6px 8px;border-bottom:1px solid #f0f0ec;color:#333">${li.desc}</td>
-      <td style="padding:6px 8px;border-bottom:1px solid #f0f0ec;text-align:right;color:#555">${li.qty}${li.unit?' '+li.unit:''}</td>
+      <td style="padding:6px 8px;border-bottom:1px solid #f0f0ec;text-align:center;color:#555">${li.qty}${li.unit?' '+li.unit:''}</td>
+      <td style="padding:6px 8px;border-bottom:1px solid #f0f0ec;text-align:right;color:#555">$${Number(li.rate).toFixed(2)}</td>
+      <td style="padding:6px 8px;border-bottom:1px solid #f0f0ec;text-align:right;font-weight:500;color:#111">$${Math.round(li.total).toLocaleString('en-CA')}</td>
     </tr>`).join('');
 
   const specRows=[
@@ -1454,7 +1456,9 @@ function exportPDF(){
     <thead>
       <tr style="background:#0f0f0f;color:#fafaf8">
         <th style="padding:7px 8px;text-align:left;font-size:11px;font-weight:500;letter-spacing:.05em">Description</th>
-        <th style="padding:7px 8px;text-align:right;font-size:11px;font-weight:500;letter-spacing:.05em">Qty</th>
+        <th style="padding:7px 8px;text-align:center;font-size:11px;font-weight:500;letter-spacing:.05em">Qty</th>
+        <th style="padding:7px 8px;text-align:right;font-size:11px;font-weight:500;letter-spacing:.05em">Rate</th>
+        <th style="padding:7px 8px;text-align:right;font-size:11px;font-weight:500;letter-spacing:.05em">Amount</th>
       </tr>
     </thead>
     <tbody>${lineRows}</tbody>
