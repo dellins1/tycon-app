@@ -1465,11 +1465,14 @@ function exportPDF(){
     <span class="pdf-header-title">Quote preview</span>
     <div class="pdf-header-btns">
       <button class="pdf-hbtn pdf-hbtn-print" onclick="printPDF()">Print / Save PDF</button>
-      <button class="pdf-hbtn pdf-hbtn-close" onclick="closePDF()">Close</button>
+      <button class="pdf-hbtn pdf-hbtn-close" onclick="closePDF()">&#10005; Close</button>
     </div>
   </div>
   <div class="pdf-body">
     <div class="pdf-doc" id="pdf-doc"></div>
+    <div style="text-align:center;padding:1.5rem 0 2rem">
+      <button onclick="closePDF()" style="height:44px;padding:0 2rem;background:#0f0f0f;color:#fafaf8;border:none;border-radius:8px;font-size:15px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif">&#10005; Close preview</button>
+    </div>
   </div>
 </div>
 </body>
@@ -1493,7 +1496,11 @@ function printPDF(){
   const win=window.open('','_blank','width=800,height=600');
   win.document.write(window._pdfHTML);
   win.document.close();
-  setTimeout(()=>{win.print();},600);
+  setTimeout(()=>{
+    win.print();
+    win.addEventListener('afterprint',()=>win.close());
+    setTimeout(()=>{ try{win.close();}catch(e){} },3000);
+  },600);
 }
 
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
@@ -1544,11 +1551,14 @@ renderSaved();
     <span class="pdf-header-title">Quote preview</span>
     <div class="pdf-header-btns">
       <button class="pdf-hbtn pdf-hbtn-print" onclick="printPDF()">Print / Save PDF</button>
-      <button class="pdf-hbtn pdf-hbtn-close" onclick="closePDF()">Close</button>
+      <button class="pdf-hbtn pdf-hbtn-close" onclick="closePDF()">&#10005; Close</button>
     </div>
   </div>
   <div class="pdf-body">
     <div class="pdf-doc" id="pdf-doc"></div>
+    <div style="text-align:center;padding:1.5rem 0 2rem">
+      <button onclick="closePDF()" style="height:44px;padding:0 2rem;background:#0f0f0f;color:#fafaf8;border:none;border-radius:8px;font-size:15px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif">&#10005; Close preview</button>
+    </div>
   </div>
 </div>
 </body>
