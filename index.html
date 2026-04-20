@@ -1326,11 +1326,17 @@ function exportPDF(){
   if(!lastSnapshot||lastTotal===0){showToast('Build a quote first before exporting.');return;}
   // Capture drawing pad canvas if it has content
   let padImageData=null;
-  if(padPosts.length>0||padWallLines.length>0){
-    const fc=document.getElementById('fs-canvas');
-    if(fc&&fc.width>0){
-      try{padImageData=fc.toDataURL('image/png');}catch(e){}
-    }
+  const fc=document.getElementById('fs-canvas');
+  if(fc&&fc.width>0&&(padPosts.length>0||padWallLines.length>0||padSegments.length>0)){
+    try{
+      padImageData=fc.toDataURL('image/png');
+      // verify it's not a blank canvas
+      if(padImageData==='data:,')padImageData=null;
+    }catch(e){padImageData=null;}
+  }
+  // Fallback: use saved photo from quote if pad is empty
+  if(!padImageData&&lastSnapshot&&lastSnapshot.photo){
+    padImageData=lastSnapshot.photo;
   }
   const q=lastSnapshot;
   const date=new Date().toLocaleDateString('en-CA',{year:'numeric',month:'long',day:'numeric'});
@@ -1465,6 +1471,7 @@ function exportPDF(){
     </div>
   </div>
 
+  ${padImageData?`<div style="margin-bottom:32px"><div style="font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:#888;margin-bottom:10px">Site layout</div><img src="${padImageData}" style="width:100%;border:1px solid #e8e8e4;border-radius:6px;display:block"></div>`:''}
   ${q.jobNotes?`<!-- Notes --><div style="background:#f5f5f3;border-radius:6px;padding:16px;margin-bottom:32px"><div style="font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:#888;margin-bottom:6px">Notes</div><div style="font-size:13px;color:#333">${q.jobNotes}</div></div>`:''}
 
   <!-- Footer -->
