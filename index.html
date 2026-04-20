@@ -1107,6 +1107,7 @@ function calc(){
     rows+=`<div style="font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--grey-400);padding:4px 0 2px">Materials</div>`;
     rows+=materialsRows;
     rows+=`<div class="brow" style="border-top:1px solid var(--grey-100);margin-top:4px"><span class="label" style="font-weight:500">Materials subtotal</span><span class="val">${fmt(materialsTotal)}</span></div>`;
+  const unroundedTotal=materialsTotal+(install||0);
   }
 
   total=materialsTotal;
@@ -1119,6 +1120,7 @@ function calc(){
 
   const roundedTotal=roundToNearest50(total);
   rows+=`<div class="total-row"><span class="label">Total</span><span class="val">${fmt(roundedTotal)}</span></div>`;
+  // Note: materials subtotal shows unrounded, only final total is rounded
   document.getElementById('breakdown-body').innerHTML=rows;
   lastTotal=total;
   const prodSnap={gateAddon:parseFloat(document.getElementById('p-gate-addon').value)||0,scGate:parseFloat(document.getElementById('p-sc-gate').value)||0,regGate:parseFloat(document.getElementById('p-reg-gate').value)||0,stair:parseFloat(document.getElementById('p-stair').value)||0,ballcaps:parseFloat(document.getElementById('p-ballcaps').value)||0,pegleg:parseFloat(document.getElementById('p-pegleg').value)||0,angleAdapter:parseFloat(document.getElementById('p-angle-adapter').value)||0,handrail:parseFloat(document.getElementById('p-handrail').value)||0,handrailBrackets:parseFloat(document.getElementById('p-handrail-brackets').value)||0,colSize:document.getElementById('p-col-size').value,colQty:parseFloat(document.getElementById('p-col-qty').value)||0};
@@ -1127,7 +1129,7 @@ function calc(){
   const customerAddress=document.getElementById('customer-address').value.trim();
   const jobNotes=document.getElementById('job-notes').value.trim();
   const jobStatus=document.getElementById('job-status').value;
-  lastSnapshot={colour,handrail,install,railCode,height,linFt,postSize,postQty,spType,spQty,total:roundedTotal,products:prodSnap,customerName,customerPhone,customerAddress,jobNotes,jobStatus};
+  lastSnapshot={colour,handrail,install,railCode,height,linFt,postSize,postQty,spType,spQty,total:roundedTotal,rawTotal:total,materialsTotal,products:prodSnap,customerName,customerPhone,customerAddress,jobNotes,jobStatus};
 }
 
 function saveQuote(){
