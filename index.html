@@ -1096,14 +1096,27 @@ function calc(){
   rows+=`<div class="brow info"><span class="label">Colour</span><span class="val"><span class="cdot" style="background:${dot}"></span>${colour}</span></div>`;
   rows+=`<div class="brow info"><span class="label">Handrail profile</span><span class="val">${handrail}</span></div>`;
   rows+=`<div class="info-divider"></div>`;
-  if(railCode&&linFt>0){const r=RAILINGS.find(x=>x.code===railCode);const rate=height==='42'?r.p42:r.p36;const cost=rate*linFt;total+=cost;const badge=`<span class="hbadge hbadge-${height}">${height}"</span>`;rows+=`<div class="brow"><span class="label">Railing ${railCode}${badge}</span><span class="val">${fmt(cost)}</span></div><div class="brow sub"><span class="label">${fmt(rate)}/ft &times; ${linFt} ft</span><span class="val"></span></div>`;}
-  if(postQty>0){const rate=POSTS[postSize];const cost=rate*postQty;total+=cost;rows+=`<div class="brow"><span class="label">Posts (${postSize}")</span><span class="val">${fmt(cost)}</span></div><div class="brow sub"><span class="label">${fmt(rate)}/post &times; ${postQty}</span><span class="val"></span></div>`;}
-  if(spQty>0){const rate=SPINDLES[spType];const cost=rate*spQty;total+=cost;const label=spType.replace('-',' — ');rows+=`<div class="brow"><span class="label">Spindles (${label})</span><span class="val">${fmt(cost)}</span></div><div class="brow sub"><span class="label">${fmt(rate)}/spindle &times; ${spQty}</span><span class="val"></span></div>`;}
-  if(install>0){total+=install;rows+=`<div class="brow"><span class="label">Install</span><span class="val">${fmt(install)}</span></div>`;}
-  if(productTotal>0){
-    total+=productTotal;
-    rows+=`<div class="brow"><span class="label">Additional products</span><span class="val">${fmt(productTotal)}</span></div>`;
+  let materialsTotal=0;
+  let materialsRows='';
+  if(railCode&&linFt>0){const r=RAILINGS.find(x=>x.code===railCode);const rate=height==='42'?r.p42:r.p36;const cost=rate*linFt;materialsTotal+=cost;const badge=`<span class="hbadge hbadge-${height}">${height}"</span>`;materialsRows+=`<div class="brow"><span class="label">Railing ${railCode}${badge}</span><span class="val">${fmt(cost)}</span></div><div class="brow sub"><span class="label">${fmt(rate)}/ft &times; ${linFt} ft</span><span class="val"></span></div>`;}
+  if(postQty>0){const rate=POSTS[postSize];const cost=rate*postQty;materialsTotal+=cost;materialsRows+=`<div class="brow"><span class="label">Posts (${postSize}")</span><span class="val">${fmt(cost)}</span></div><div class="brow sub"><span class="label">${fmt(rate)}/post &times; ${postQty}</span><span class="val"></span></div>`;}
+  if(spQty>0){const rate=SPINDLES[spType];const cost=rate*spQty;materialsTotal+=cost;const label=spType.replace('-',' — ');materialsRows+=`<div class="brow"><span class="label">Spindles (${label})</span><span class="val">${fmt(cost)}</span></div><div class="brow sub"><span class="label">${fmt(rate)}/spindle &times; ${spQty}</span><span class="val"></span></div>`;}
+  if(productTotal>0){materialsTotal+=productTotal;materialsRows+=`<div class="brow"><span class="label">Additional products</span><span class="val">${fmt(productTotal)}</span></div>`;}
+
+  if(materialsRows){
+    rows+=`<div style="font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--grey-400);padding:4px 0 2px">Materials</div>`;
+    rows+=materialsRows;
+    rows+=`<div class="brow" style="border-top:1px solid var(--grey-100);margin-top:4px"><span class="label" style="font-weight:500">Materials subtotal</span><span class="val">${fmt(materialsTotal)}</span></div>`;
   }
+
+  total=materialsTotal;
+
+  if(install>0){
+    total+=install;
+    rows+=`<div style="font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--grey-400);padding:10px 0 2px">Install</div>`;
+    rows+=`<div class="brow"><span class="label">Installation</span><span class="val">${fmt(install)}</span></div>`;
+  }
+
   const roundedTotal=roundToNearest50(total);
   rows+=`<div class="total-row"><span class="label">Total</span><span class="val">${fmt(roundedTotal)}</span></div>`;
   document.getElementById('breakdown-body').innerHTML=rows;
