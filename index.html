@@ -200,7 +200,7 @@
 </head>
 <body>
 <header>
-  <img src="Newtyconlogowhite__1_.png" alt="Tycon Railings" style="height:44px;width:auto;display:block;">
+  <img src="newtyconclogoblue2.png" alt="Tycon Railings" style="height:44px;width:auto;display:block;">
   <div class="header-tag">Internal Quote Tool</div>
 </header>
 <div class="container">
@@ -290,7 +290,7 @@
 
     <div class="card">
       <p class="sec-label">Customer &amp; job info</p>
-      <div class="grid grid-3">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.875rem">
         <div class="fgroup" style="grid-column:1/-1">
           <label>Customer name</label>
           <input type="text" id="customer-name" placeholder="Jane Smith" style="font-size:16px" oninput="calc()">
@@ -299,7 +299,7 @@
           <label>Phone number</label>
           <input type="tel" id="customer-phone" placeholder="416-555-0100" style="font-size:16px" oninput="calc()">
         </div>
-        <div class="fgroup" style="grid-column:2/4">
+        <div class="fgroup">
           <label>Status</label>
           <select id="job-status" onchange="updateStatusBadge();calc()">
             <option value="Lead">Lead</option>
@@ -321,20 +321,20 @@
 
     <div class="card">
       <p class="sec-label">Railing</p>
-      <div class="grid grid-3">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.875rem">
         <div class="fgroup"><label>Railing type</label>
           <select id="railing-type" onchange="calc()"><option value="">— select —</option></select>
         </div>
         <div class="fgroup"><label>Height</label>
           <select id="railing-height" onchange="calc()"><option value="36">36"</option><option value="42">42"</option></select>
         </div>
-        <div class="fgroup"><label>Linear feet</label>
+        <div class="fgroup" style="grid-column:1/-1"><label>Linear feet</label>
           <input type="number" id="linear-ft" min="0" placeholder="0" oninput="calc()">
         </div>
       </div>
       <div class="divider"></div>
       <p class="sec-label">Posts</p>
-      <div class="grid grid-3">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.875rem">
         <div class="fgroup"><label>Post size</label>
           <select id="post-size" onchange="calc()"><option value="2">2"</option><option value="3">3"</option><option value="4">4"</option></select>
         </div>
@@ -344,7 +344,7 @@
       </div>
       <div class="divider"></div>
       <p class="sec-label">Spindles</p>
-      <div class="grid grid-3">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.875rem">
         <div class="fgroup"><label>Spindle type</label>
           <select id="spindle-type" onchange="calc()">
             <option value="WALL-regular">WALL — Regular</option>
@@ -475,7 +475,7 @@
 
     <div class="card">
       <p class="sec-label">Job details</p>
-      <div class="grid grid-3">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.875rem">
         <div class="fgroup"><label>Colour</label>
           <select id="colour" onchange="calc()">
             <option value="Black">Black</option><option value="Pewter">Pewter</option>
@@ -491,7 +491,7 @@
             <option value="Primo">Primo</option>
           </select>
         </div>
-        <div class="fgroup"><label>Install cost ($)</label>
+        <div class="fgroup" style="grid-column:1/-1"><label>Install cost ($)</label>
           <input type="number" id="install-cost" min="0" placeholder="0" oninput="calc()">
         </div>
       </div>
