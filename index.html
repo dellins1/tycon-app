@@ -196,12 +196,16 @@
   .pdf-doc{background:#fff;max-width:680px;margin:0 auto;padding:32px;border-radius:var(--radius-lg);box-shadow:0 2px 12px rgba(0,0,0,.08)}
   .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--black);color:var(--white);padding:.75rem 1.25rem;border-radius:var(--radius-lg);font-size:.85rem;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;z-index:999}
   .toast.show{opacity:1;transform:translateY(0)}
+  #setup-overlay.open{display:flex !important;}
 </style>
 </head>
 <body>
 <header>
   <img src="newtyconclogoblue2.png" alt="Tycon Railings" style="height:44px;width:auto;display:block;">
-  <div class="header-tag">Internal Quote Tool</div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <div class="header-tag" id="company-name-display">Quote Tool</div>
+    <button onclick="openSetup()" title="Settings" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);border-radius:6px;width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#8fa3bb;font-size:16px;transition:background .15s" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">&#9881;</button>
+  </div>
 </header>
 <div class="container">
   <p class="page-title">Quote Calculator</p>
@@ -532,23 +536,151 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const RAILINGS=[
-  {code:"R1",p36:30,p42:32},{code:"R2",p36:34,p42:35},{code:"R3",p36:32.5,p42:33.5},
-  {code:"R4",p36:34,p42:35},{code:"R4S",p36:53,p42:55},{code:"R5",p36:37,p42:38},
-  {code:"R5S",p36:55,p42:57},{code:"R6",p36:35,p42:36},{code:"R6S",p36:54,p42:56},
-  {code:"R7",p36:38,p42:39},{code:"R8",p36:42,p42:43},{code:"R9",p36:39,p42:40},
-  {code:"R10",p36:37,p42:38},{code:"R11",p36:40,p42:41},{code:"R12",p36:36,p42:37},
-  {code:"R12OPEN",p36:34,p42:36},{code:"R13",p36:39,p42:40},{code:"R13OPEN",p36:39,p42:40},
-  {code:"R14",p36:37,p42:38},{code:"R14OPEN",p36:37,p42:38},{code:"R15",p36:38,p42:39},
-  {code:"R16",p36:35,p42:36},{code:"R17",p36:37,p42:38},{code:"R18",p36:34,p42:35},
-  {code:"R19",p36:56,p42:58},{code:"R20",p36:70,p42:71},{code:"PS1",p36:36,p42:38},
-  {code:"PS2",p36:42,p42:44},{code:"PS3",p36:46,p42:48},{code:"GR1",p36:65,p42:67},
-  {code:"GR2",p36:70,p42:72},{code:"GR3",p36:81,p42:83},{code:"GR4",p36:65,p42:67},
-  {code:"GR5",p36:91,p42:97},{code:"GR6",p36:85,p42:92}
-];
-const POSTS={"2":40,"3":42,"4":57};
-const SPINDLES={"WALL-regular":4,"WALL-platinum":6,"MINI-regular":1};
+/* ── Default pricing (used if no config saved) ── */
+const DEFAULT_CONFIG={
+  companyName:"My Railing Company",
+  pin:"1234",
+  railings:[
+    {code:"R1",p36:30,p42:32},{code:"R2",p36:34,p42:35},{code:"R3",p36:32.5,p42:33.5},
+    {code:"R4",p36:34,p42:35},{code:"R4S",p36:53,p42:55},{code:"R5",p36:37,p42:38},
+    {code:"R5S",p36:55,p42:57},{code:"R6",p36:35,p42:36},{code:"R6S",p36:54,p42:56},
+    {code:"R7",p36:38,p42:39},{code:"R8",p36:42,p42:43},{code:"R9",p36:39,p42:40},
+    {code:"R10",p36:37,p42:38},{code:"R11",p36:40,p42:41},{code:"R12",p36:36,p42:37},
+    {code:"R12OPEN",p36:34,p42:36},{code:"R13",p36:39,p42:40},{code:"R13OPEN",p36:39,p42:40},
+    {code:"R14",p36:37,p42:38},{code:"R14OPEN",p36:37,p42:38},{code:"R15",p36:38,p42:39},
+    {code:"R16",p36:35,p42:36},{code:"R17",p36:37,p42:38},{code:"R18",p36:34,p42:35},
+    {code:"R19",p36:56,p42:58},{code:"R20",p36:70,p42:71},{code:"PS1",p36:36,p42:38},
+    {code:"PS2",p36:42,p42:44},{code:"PS3",p36:46,p42:48},{code:"GR1",p36:65,p42:67},
+    {code:"GR2",p36:70,p42:72},{code:"GR3",p36:81,p42:83},{code:"GR4",p36:65,p42:67},
+    {code:"GR5",p36:91,p42:97},{code:"GR6",p36:85,p42:92}
+  ],
+  posts:{"2":40,"3":42,"4":57},
+  spindles:{"WALL-regular":4,"WALL-platinum":6,"MINI-regular":1},
+  products:{
+    "gate-addon":90,"sc-gate":95,"reg-gate":85,"stair":25,
+    "ballcaps":25,"pegleg":5.5,"angle-adapter":50,
+    "handrail":18,"handrail-brackets":11
+  }
+};
+
+function loadConfig(){
+  try{return JSON.parse(localStorage.getItem('quote_config'))||null;}catch(e){return null;}
+}
+function saveConfig(cfg){localStorage.setItem('quote_config',JSON.stringify(cfg));}
+
+let CFG=loadConfig()||{...DEFAULT_CONFIG};
+let RAILINGS=CFG.railings;
+let POSTS=CFG.posts;
+let SPINDLES=CFG.spindles;
+
 const COLOUR_DOTS={"Black":"#1a1a1a","Pewter":"#8e8e8e","White":"#e8e8e4","Brown":"#6b3a2a","Clay":"#b5956a","Sandlewood":"#c8a882","Cashmere":"#d4c4a8"};
+
+/* ── Setup overlay functions ── */
+function openSetup(){
+  const pin=prompt('Enter admin PIN to access settings:');
+  if(pin===null)return;
+  if(pin!==CFG.pin){alert('Incorrect PIN.');return;}
+  buildSetupUI();
+  document.getElementById('setup-overlay').classList.add('open');
+}
+function closeSetup(){document.getElementById('setup-overlay').classList.remove('open');}
+
+function buildSetupUI(){
+  const cfg=CFG;
+  document.getElementById('setup-company').value=cfg.companyName||'';
+  document.getElementById('setup-pin').value=cfg.pin||'1234';
+  // Posts
+  document.getElementById('setup-post-2').value=cfg.posts['2']||'';
+  document.getElementById('setup-post-3').value=cfg.posts['3']||'';
+  document.getElementById('setup-post-4').value=cfg.posts['4']||'';
+  // Spindles
+  document.getElementById('setup-sp-wall-reg').value=cfg.spindles['WALL-regular']||'';
+  document.getElementById('setup-sp-wall-plat').value=cfg.spindles['WALL-platinum']||'';
+  document.getElementById('setup-sp-mini-reg').value=cfg.spindles['MINI-regular']||'';
+  // Products
+  const prods=cfg.products||{};
+  ['gate-addon','sc-gate','reg-gate','stair','ballcaps','pegleg','angle-adapter','handrail','handrail-brackets'].forEach(k=>{
+    const el=document.getElementById('setup-prod-'+k);
+    if(el)el.value=prods[k]||'';
+  });
+  // Railings table
+  const tbody=document.getElementById('setup-railings-body');
+  tbody.innerHTML='';
+  cfg.railings.forEach((r,i)=>{
+    tbody.innerHTML+=`<tr>
+      <td style="padding:4px 6px;font-size:13px;font-weight:500;color:#0d1b2e">${r.code}</td>
+      <td style="padding:4px 6px"><input type="number" step="0.5" value="${r.p36}" data-ri="${i}" data-field="p36" oninput="updateRailingDraft(this)" style="width:70px;height:32px;padding:0 6px;border:1px solid #e5e6e2;border-radius:4px;font-size:13px;font-family:inherit"></td>
+      <td style="padding:4px 6px"><input type="number" step="0.5" value="${r.p42}" data-ri="${i}" data-field="p42" oninput="updateRailingDraft(this)" style="width:70px;height:32px;padding:0 6px;border:1px solid #e5e6e2;border-radius:4px;font-size:13px;font-family:inherit"></td>
+    </tr>`;
+  });
+}
+
+let _railingDraft=[];
+function startSetup(){_railingDraft=JSON.parse(JSON.stringify(CFG.railings));}
+
+function updateRailingDraft(el){
+  const i=parseInt(el.dataset.ri);
+  const f=el.dataset.field;
+  _railingDraft[i][f]=parseFloat(el.value)||0;
+}
+
+function saveSetup(){
+  const newPin=document.getElementById('setup-pin').value.trim();
+  if(!newPin){alert('PIN cannot be empty.');return;}
+  _railingDraft=CFG.railings.map((r,i)=>{
+    const p36El=document.querySelector(`#setup-railings-body tr:nth-child(${i+1}) input[data-field="p36"]`);
+    const p42El=document.querySelector(`#setup-railings-body tr:nth-child(${i+1}) input[data-field="p42"]`);
+    return{code:r.code,p36:parseFloat(p36El?.value)||r.p36,p42:parseFloat(p42El?.value)||r.p42};
+  });
+  CFG={
+    companyName:document.getElementById('setup-company').value.trim()||'My Railing Company',
+    pin:newPin,
+    railings:_railingDraft,
+    posts:{
+      "2":parseFloat(document.getElementById('setup-post-2').value)||0,
+      "3":parseFloat(document.getElementById('setup-post-3').value)||0,
+      "4":parseFloat(document.getElementById('setup-post-4').value)||0
+    },
+    spindles:{
+      "WALL-regular":parseFloat(document.getElementById('setup-sp-wall-reg').value)||0,
+      "WALL-platinum":parseFloat(document.getElementById('setup-sp-wall-plat').value)||0,
+      "MINI-regular":parseFloat(document.getElementById('setup-sp-mini-reg').value)||0
+    },
+    products:{
+      "gate-addon":parseFloat(document.getElementById('setup-prod-gate-addon').value)||0,
+      "sc-gate":parseFloat(document.getElementById('setup-prod-sc-gate').value)||0,
+      "reg-gate":parseFloat(document.getElementById('setup-prod-reg-gate').value)||0,
+      "stair":parseFloat(document.getElementById('setup-prod-stair').value)||0,
+      "ballcaps":parseFloat(document.getElementById('setup-prod-ballcaps').value)||0,
+      "pegleg":parseFloat(document.getElementById('setup-prod-pegleg').value)||0,
+      "angle-adapter":parseFloat(document.getElementById('setup-prod-angle-adapter').value)||0,
+      "handrail":parseFloat(document.getElementById('setup-prod-handrail').value)||0,
+      "handrail-brackets":parseFloat(document.getElementById('setup-prod-handrail-brackets').value)||0
+    }
+  };
+  saveConfig(CFG);
+  RAILINGS=CFG.railings;
+  POSTS=CFG.posts;
+  SPINDLES=CFG.spindles;
+  // Update company name in header
+  const nameEl=document.getElementById('company-name-display');
+  if(nameEl)nameEl.textContent=CFG.companyName;
+  // Rebuild railing dropdown
+  const rtSel=document.getElementById('railing-type');
+  rtSel.innerHTML='<option value="">— select —</option>';
+  RAILINGS.forEach(r=>{const o=document.createElement('option');o.value=r.code;o.textContent=r.code;rtSel.appendChild(o);});
+  closeSetup();
+  showToast('Settings saved!');
+  calc();
+}
+
+function resetToDefaults(){
+  if(!confirm('Reset all pricing to defaults? This cannot be undone.'))return;
+  CFG={...DEFAULT_CONFIG};
+  saveConfig(CFG);
+  buildSetupUI();
+  showToast('Reset to defaults.');
+}
 
 let savedQuotes=JSON.parse(localStorage.getItem('tycon_quotes')||'[]');
 let lastTotal=0,lastSnapshot=null;
@@ -558,6 +690,11 @@ let editingId=null;
 
 const rtSel=document.getElementById('railing-type');
 RAILINGS.forEach(r=>{const o=document.createElement('option');o.value=r.code;o.textContent=r.code;rtSel.appendChild(o);});
+// Apply company name on load
+const nameEl=document.getElementById('company-name-display');
+if(nameEl)nameEl.textContent=CFG.companyName||'Quote Tool';
+// Show setup prompt if first time (no config saved)
+if(!loadConfig()){setTimeout(()=>{if(confirm('Welcome! No pricing is configured yet. Set up your pricing now?')){openSetup();}},500);}
 
 function fmt(n){return'$'+Math.round(n).toLocaleString('en-CA')}
 
@@ -1063,16 +1200,17 @@ function calc(){
 
 
   // Products
+  const P=CFG.products||{};
   const products=[
-    {id:'gate-addon',        price:90,  label:'Gate addon'},
-    {id:'sc-gate',           price:95,  label:'Self closing gate'},
-    {id:'reg-gate',          price:85,  label:'Regular gate'},
-    {id:'stair',             price:25,  label:'Stair template'},
-    {id:'ballcaps',          price:25,  label:'Ball caps'},
-    {id:'pegleg',            price:5.5, label:'Peg leg'},
-    {id:'angle-adapter',     price:50,  label:'Angle adapter'},
-    {id:'handrail',          price:18,  label:'Handrail'},
-    {id:'handrail-brackets', price:11,  label:'Handrail brackets'},
+    {id:'gate-addon',        price:P['gate-addon']||90,  label:'Gate addon'},
+    {id:'sc-gate',           price:P['sc-gate']||95,     label:'Self closing gate'},
+    {id:'reg-gate',          price:P['reg-gate']||85,    label:'Regular gate'},
+    {id:'stair',             price:P['stair']||25,       label:'Stair template'},
+    {id:'ballcaps',          price:P['ballcaps']||25,    label:'Ball caps'},
+    {id:'pegleg',            price:P['pegleg']||5.5,     label:'Peg leg'},
+    {id:'angle-adapter',     price:P['angle-adapter']||50, label:'Angle adapter'},
+    {id:'handrail',          price:P['handrail']||18,    label:'Handrail'},
+    {id:'handrail-brackets', price:P['handrail-brackets']||11, label:'Handrail brackets'},
   ];
   let productTotal=0;
   products.forEach(p=>{
@@ -1588,3 +1726,67 @@ renderSaved();
 </div>
 </body>
 </html>
+
+<!-- SETUP OVERLAY -->
+<div id="setup-overlay" style="display:none;position:fixed;inset:0;z-index:10000;background:#eceee9;flex-direction:column;overflow-y:auto">
+  <div style="background:#0d1b2e;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #c8922a;position:sticky;top:0;z-index:1">
+    <span style="color:#fff;font-size:15px;font-weight:500">Pricing Setup</span>
+    <button onclick="closeSetup()" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:6px;color:#fff;padding:6px 14px;cursor:pointer;font-family:inherit;font-size:13px">Close</button>
+  </div>
+  <div style="max-width:720px;margin:0 auto;padding:20px 16px 80px">
+    <div style="background:#fff;border-radius:12px;border:0.5px solid #e5e6e2;padding:20px;margin-bottom:12px">
+      <p style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#0d1b2e;background:#f0f4f8;padding:6px 10px;border-radius:6px;margin-bottom:16px;display:flex;align-items:center;gap:6px"><span style="display:inline-block;width:3px;height:12px;background:#c8922a;border-radius:2px"></span>Company</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="fgroup"><label>Company name</label><input type="text" id="setup-company" placeholder="Your Company Name"></div>
+        <div class="fgroup"><label>Admin PIN</label><input type="password" id="setup-pin" placeholder="e.g. 1234" maxlength="8"></div>
+      </div>
+    </div>
+    <div style="background:#fff;border-radius:12px;border:0.5px solid #e5e6e2;padding:20px;margin-bottom:12px">
+      <p style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#0d1b2e;background:#f0f4f8;padding:6px 10px;border-radius:6px;margin-bottom:16px;display:flex;align-items:center;gap:6px"><span style="display:inline-block;width:3px;height:12px;background:#c8922a;border-radius:2px"></span>Post prices ($ each)</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+        <div class="fgroup"><label>2" post</label><input type="number" id="setup-post-2" step="0.5" placeholder="0"></div>
+        <div class="fgroup"><label>3" post</label><input type="number" id="setup-post-3" step="0.5" placeholder="0"></div>
+        <div class="fgroup"><label>4" post</label><input type="number" id="setup-post-4" step="0.5" placeholder="0"></div>
+      </div>
+    </div>
+    <div style="background:#fff;border-radius:12px;border:0.5px solid #e5e6e2;padding:20px;margin-bottom:12px">
+      <p style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#0d1b2e;background:#f0f4f8;padding:6px 10px;border-radius:6px;margin-bottom:16px;display:flex;align-items:center;gap:6px"><span style="display:inline-block;width:3px;height:12px;background:#c8922a;border-radius:2px"></span>Spindle prices ($ each)</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+        <div class="fgroup"><label>WALL — Regular</label><input type="number" id="setup-sp-wall-reg" step="0.5" placeholder="0"></div>
+        <div class="fgroup"><label>WALL — Platinum</label><input type="number" id="setup-sp-wall-plat" step="0.5" placeholder="0"></div>
+        <div class="fgroup"><label>MINI — Regular</label><input type="number" id="setup-sp-mini-reg" step="0.5" placeholder="0"></div>
+      </div>
+    </div>
+    <div style="background:#fff;border-radius:12px;border:0.5px solid #e5e6e2;padding:20px;margin-bottom:12px">
+      <p style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#0d1b2e;background:#f0f4f8;padding:6px 10px;border-radius:6px;margin-bottom:16px;display:flex;align-items:center;gap:6px"><span style="display:inline-block;width:3px;height:12px;background:#c8922a;border-radius:2px"></span>Additional product prices</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="fgroup"><label>Gate addon ($)</label><input type="number" id="setup-prod-gate-addon" step="0.5" placeholder="0"></div>
+        <div class="fgroup"><label>Self closing gate ($)</label><input type="number" id="setup-prod-sc-gate" step="0.5" placeholder="0"></div>
+        <div class="fgroup"><label>Regular gate ($)</label><input type="number" id="setup-prod-reg-gate" step="0.5" placeholder="0"></div>
+        <div class="fgroup"><label>Stair template ($)</label><input type="number" id="setup-prod-stair" step="0.5" placeholder="0"></div>
+        <div class="fgroup"><label>Ball caps ($)</label><input type="number" id="setup-prod-ballcaps" step="0.5" placeholder="0"></div>
+        <div class="fgroup"><label>Peg leg ($)</label><input type="number" id="setup-prod-pegleg" step="0.5" placeholder="0"></div>
+        <div class="fgroup"><label>Angle adapter ($)</label><input type="number" id="setup-prod-angle-adapter" step="0.5" placeholder="0"></div>
+        <div class="fgroup"><label>Handrail ($/ft)</label><input type="number" id="setup-prod-handrail" step="0.5" placeholder="0"></div>
+        <div class="fgroup" style="grid-column:1/-1"><label>Handrail brackets ($)</label><input type="number" id="setup-prod-handrail-brackets" step="0.5" placeholder="0"></div>
+      </div>
+    </div>
+    <div style="background:#fff;border-radius:12px;border:0.5px solid #e5e6e2;padding:20px;margin-bottom:20px">
+      <p style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#0d1b2e;background:#f0f4f8;padding:6px 10px;border-radius:6px;margin-bottom:16px;display:flex;align-items:center;gap:6px"><span style="display:inline-block;width:3px;height:12px;background:#c8922a;border-radius:2px"></span>Railing prices ($/linear ft)</p>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse">
+          <thead><tr>
+            <th style="text-align:left;font-size:11px;color:#9a9b96;font-weight:500;padding:4px 6px;border-bottom:1px solid #e5e6e2">Code</th>
+            <th style="text-align:left;font-size:11px;color:#9a9b96;font-weight:500;padding:4px 6px;border-bottom:1px solid #e5e6e2">36" ($/ft)</th>
+            <th style="text-align:left;font-size:11px;color:#9a9b96;font-weight:500;padding:4px 6px;border-bottom:1px solid #e5e6e2">42" ($/ft)</th>
+          </tr></thead>
+          <tbody id="setup-railings-body"></tbody>
+        </table>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:space-between">
+      <button onclick="resetToDefaults()" style="height:42px;padding:0 16px;border-radius:6px;border:1px solid #e5e6e2;background:#fff;color:#c0392b;font-family:inherit;font-size:13px;cursor:pointer">Reset to defaults</button>
+      <button onclick="saveSetup()" style="height:42px;padding:0 24px;border-radius:6px;border:none;background:#c8922a;color:#fff;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer">Save settings</button>
+    </div>
+  </div>
+</div>
