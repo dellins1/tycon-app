@@ -1445,31 +1445,6 @@ function renderSaved(){
       ${photoHtml}
       ${drawingHtml}
     </div>`;
-    const statusClass='qi-status status-'+(q.jobStatus||'Lead');
-    const statusLabel=q.jobStatus||'Lead';
-    const phoneLine=q.customerPhone?`<div style="font-size:12px;color:var(--grey-400);margin-top:1px">${q.customerPhone}</div>`:'';    const addrLine=q.customerAddress?`<div style="font-size:12px;color:var(--grey-400);margin-top:1px">${q.customerAddress}</div>`:'';
-    const notesLine=q.jobNotes?`<div style="font-size:12px;color:var(--grey-400);margin-top:3px;font-style:italic">${q.jobNotes}</div>`:'';
-    return `<div class="quote-item" style="flex-direction:column;align-items:stretch;gap:.5rem">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem">
-        <div class="qi-left">
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-            <div class="qi-name">${q.name}</div>
-            <span class="${statusClass}">${statusLabel}</span>
-          </div>
-          ${phoneLine}
-          ${addrLine}
-          <div class="qi-meta" style="margin-top:2px">${q.date} &nbsp;&middot;&nbsp; ${parts.join(' &nbsp;&middot;&nbsp; ')}</div>
-          ${notesLine}
-        </div>
-        <div style="display:flex;align-items:center;gap:.5rem;flex-shrink:0">
-          <div class="qi-total">${fmt(q.total)}</div>
-          <button class="qi-photo-btn" onclick="loadQuoteForEdit(${q.id})" title="Edit">&#9998;</button>
-          ${q.photo?`<button class="qi-photo-btn" onclick="togglePhoto(${q.id})" title="View sketch">&#128247;</button>`:''}
-          <button class="qi-del" onclick="deleteQuote(${q.id})" title="Delete">&times;</button>
-        </div>
-      </div>
-      ${photoHtml}
-    </div>`;
   }).join('');
 }
 function switchTab(id,btn){
