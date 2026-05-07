@@ -220,7 +220,7 @@
     <div class="card">
       <div class="pad-tabs">
         <button class="pad-tab active" onclick="switchPadTab('draw',this)">Draw layout</button>
-        <button class="pad-tab" onclick="switchPadTab('scan',this)">Scan photo</button>
+        <button class="pad-tab" onclick="switchPadTab('photo',this)">Job photo</button>
       </div>
 
       <!-- DRAW PAD -->
@@ -242,54 +242,31 @@
         </div>
       </div>
 
-      <!-- SCAN -->
-      <div class="pad-pane" id="pad-scan">
-        <div class="scan-zone" id="scan-zone">
-          <input type="file" accept="image/*" capture="environment" id="photo-input" onchange="handlePhoto(event)">
-          <div class="scan-icon">&#128247;</div>
-          <div class="scan-label">Take a photo or upload a sketch</div>
-          <div class="scan-sub">App reads measurements — you confirm each section before applying</div>
-          <img class="scan-preview" id="scan-preview" alt="Sketch preview">
-          <div class="scan-status" id="scan-status"></div>
-        </div>
-
-      <!-- Section-by-section confirm panel -->
-      <div class="section-panel" id="section-panel">
-        <div class="section-panel-header">
-          <div class="section-panel-title">Confirm railing sections</div>
-          <div class="section-panel-sub">Edit any section length, add missing ones, or remove incorrect ones</div>
-        </div>
-        <div class="section-panel-body">
-
-          <div class="posts-row">
-            <label>Number of posts</label>
-            <input type="number" id="s-posts" min="0" placeholder="0">
+      <!-- JOB PHOTO -->
+      <div class="pad-pane" id="pad-photo">
+        <div style="padding:.75rem 0">
+          <div id="job-photo-empty" style="text-align:center;padding:1.25rem 1rem">
+            <div style="font-size:2rem;margin-bottom:.5rem">&#128247;</div>
+            <p style="font-size:.9rem;font-weight:500;color:var(--grey-600);margin-bottom:.25rem">Attach a job photo</p>
+            <p style="font-size:.78rem;color:var(--grey-400);margin-bottom:1rem">Photo is saved with this quote</p>
+            <label style="display:inline-block;cursor:pointer">
+              <input type="file" accept="image/*" capture="environment" id="photo-input" onchange="handleJobPhoto(event)" style="display:none">
+              <span class="btn btn-primary" style="display:inline-flex;align-items:center;gap:6px">&#128247; Take / Upload photo</span>
+            </label>
           </div>
-
-          <div class="sections-title">Railing sections</div>
-          <div id="sections-container"></div>
-          <button class="add-section-btn" onclick="addSection(null)">+ Add section</button>
-
-          <div class="section-summary">
-            <span class="s-label">Total linear ft</span>
-            <span class="s-val" id="s-total">0 ft</span>
-          </div>
-          <div class="section-summary" style="padding-top:.25rem;border-top:none">
-            <span class="s-label">Spindles (2 per section)</span>
-            <span class="s-val" id="s-spindles">0</span>
-          </div>
-
-          <div class="section-actions">
-            <button class="btn btn-ghost" onclick="dismissPanel()">Cancel</button>
-            <button class="btn btn-accent" onclick="applysections()">Apply to form</button>
+          <div id="job-photo-preview-wrap" style="display:none">
+            <img id="job-photo-preview" style="width:100%;max-height:220px;object-fit:cover;border-radius:8px;display:block">
+            <div style="display:flex;gap:8px;margin-top:10px">
+              <label style="flex:1;cursor:pointer">
+                <input type="file" accept="image/*" capture="environment" id="photo-input-replace" onchange="handleJobPhoto(event)" style="display:none">
+                <span class="btn btn-ghost btn-sm" style="width:100%;display:flex;align-items:center;justify-content:center;gap:4px">&#128247; Replace</span>
+              </label>
+              <button class="btn btn-ghost btn-sm" onclick="clearJobPhoto()" style="flex:1;color:var(--danger);border-color:#f7c1c1">&#10005; Remove</button>
+            </div>
           </div>
         </div>
       </div>
 
-        <div style="margin-top:.75rem">
-          <button class="btn btn-ghost" id="clear-photo-btn" style="display:none" onclick="clearPhoto()">Clear photo</button>
-        </div>
-      </div><!-- end pad-scan -->
     </div>
 
     <div class="card">
@@ -790,48 +767,27 @@ function dismissPanel(){
 }
 
 /* ── Photo handler ── */
-async function handlePhoto(event){
+function handleJobPhoto(event){
   const file=event.target.files[0];if(!file)return;
-  const preview=document.getElementById('scan-preview');
-  const status=document.getElementById('scan-status');
   const reader=new FileReader();
-  reader.onload=async(e)=>{
-    const base64=e.target.result.split(',')[1];
-    const mediaType=file.type||'image/jpeg';
-    preview.src=e.target.result;preview.style.display='block';
+  reader.onload=(e)=>{
     currentPhotoDataUrl=e.target.result;
-    document.getElementById('clear-photo-btn').style.display='inline-flex';
-    document.getElementById('section-panel').classList.remove('show');
-    status.className='scan-status loading';status.textContent='Reading your sketch...';
-    try{
-      const res=await fetch('/api/scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({base64,mediaType})});
-      const data=await res.json();
-      if(data.error)throw new Error(data.error.message||data.error);
-      const text=data.content[0].text.trim();
-      const parsed=JSON.parse(text.replace(/```json|```/g,'').trim());
-      showSectionPanel(parsed);
-      const sc=parsed.sections?parsed.sections.length:0;
-      status.className='scan-status success';
-      status.textContent=`Found ${sc} section${sc!==1?'s':''} and ${parsed.post_count||'?'} posts — confirm below.`;
-    }catch(err){
-      status.className='scan-status error';
-      status.textContent='Error: '+err.message;
-    }
+    document.getElementById('job-photo-preview').src=e.target.result;
+    document.getElementById('job-photo-preview-wrap').style.display='block';
+    document.getElementById('job-photo-empty').style.display='none';
   };
   reader.readAsDataURL(file);
 }
 
-function clearPhoto(){
-  document.getElementById('photo-input').value='';
-  document.getElementById('scan-preview').style.display='none';
-  document.getElementById('scan-preview').src='';
-  document.getElementById('scan-status').textContent='';
-  document.getElementById('scan-status').className='scan-status';
-  document.getElementById('clear-photo-btn').style.display='none';
-  document.getElementById('section-panel').classList.remove('show');
+function clearJobPhoto(){
   currentPhotoDataUrl=null;
-  ['linear-ft','post-qty','spindle-qty'].forEach(id=>document.getElementById(id).classList.remove('ai-filled'));
+  document.getElementById('photo-input').value='';
+  document.getElementById('job-photo-preview').src='';
+  document.getElementById('job-photo-preview-wrap').style.display='none';
+  document.getElementById('job-photo-empty').style.display='block';
 }
+
+function clearPhoto(){clearJobPhoto();}
 
 /* ── Calculator ── */
 
@@ -1272,38 +1228,54 @@ function calc(){
 
 function saveQuote(){
   if(!lastSnapshot||lastTotal===0){showToast('Nothing to save yet.');return;}
+
+  // Compress photo if large
   let photoData=currentPhotoDataUrl||null;
-  if(currentPhotoDataUrl&&currentPhotoDataUrl.length>100000){
+  if(photoData&&photoData.length>200000){
     const canvas=document.createElement('canvas');
     const img=new Image();
-    img.src=currentPhotoDataUrl;
-    canvas.width=600;canvas.height=Math.round(img.height*(600/img.width));
+    img.src=photoData;
+    canvas.width=800;canvas.height=Math.round(img.height*(800/img.width));
     const ctx=canvas.getContext('2d');
     ctx.drawImage(img,0,0,canvas.width,canvas.height);
-    photoData=canvas.toDataURL('image/jpeg',0.6);
+    photoData=canvas.toDataURL('image/jpeg',0.7);
   }
-  // Also capture drawing pad if it has content
-  if(!photoData&&(padPosts.length>0||padWallLines.length>0||padSegments.length>0)){
+
+  // Capture drawing canvas image
+  let drawingImg=null;
+  const hasDrawing=padPosts.length>0||padWallLines.length>0||padSegments.length>0;
+  if(hasDrawing){
     const fc=document.getElementById('fs-canvas');
-    if(fc&&fc.width>0){
-      try{photoData=fc.toDataURL('image/png');}catch(e){}
-    }
+    if(fc&&fc.width>0){try{drawingImg=fc.toDataURL('image/png');}catch(e){}}
   }
+
+  // Serialize drawing state so it can be restored
+  const drawingState=hasDrawing?{
+    posts:JSON.parse(JSON.stringify(padPosts)),
+    segments:JSON.parse(JSON.stringify(padSegments)),
+    columns:JSON.parse(JSON.stringify(padColumns)),
+    wallLines:JSON.parse(JSON.stringify(padWallLines)),
+    textLabels:JSON.parse(JSON.stringify(padTextLabels)),
+    postCounter:padPostCounter,
+    colCounter:padColCounter
+  }:null;
+
   if(editingId!==null){
     const idx=savedQuotes.findIndex(q=>q.id===editingId);
     if(idx>-1){
       const existing=savedQuotes[idx];
-      const freshStatus=document.getElementById('job-status').value;
-      const freshName=document.getElementById('customer-name').value.trim();
-      const freshPhone=document.getElementById('customer-phone').value.trim();
-      const freshAddress=document.getElementById('customer-address').value.trim();
-      const freshNotes=document.getElementById('job-notes').value.trim();
-      let updatedPhoto=photoData||existing.photo;
-      if(!updatedPhoto&&(padPosts.length>0||padWallLines.length>0||padSegments.length>0)){
-        const fc=document.getElementById('fs-canvas');
-        if(fc&&fc.width>0){try{updatedPhoto=fc.toDataURL('image/png');}catch(e){}}
-      }
-      savedQuotes[idx]={...lastSnapshot,jobStatus:freshStatus,customerName:freshName,customerPhone:freshPhone,customerAddress:freshAddress,jobNotes:freshNotes,name:existing.name,date:existing.date,id:existing.id,photo:updatedPhoto};
+      savedQuotes[idx]={
+        ...lastSnapshot,
+        jobStatus:document.getElementById('job-status').value,
+        customerName:document.getElementById('customer-name').value.trim(),
+        customerPhone:document.getElementById('customer-phone').value.trim(),
+        customerAddress:document.getElementById('customer-address').value.trim(),
+        jobNotes:document.getElementById('job-notes').value.trim(),
+        name:existing.name,date:existing.date,id:existing.id,
+        photo:photoData||existing.photo,
+        drawingImg:drawingImg||existing.drawingImg,
+        drawingState:drawingState||existing.drawingState
+      };
       localStorage.setItem('tycon_quotes',JSON.stringify(savedQuotes));
       editingId=null;
       document.getElementById('save-btn').textContent='Save quote';
@@ -1315,7 +1287,7 @@ function saveQuote(){
   const defaultName=lastSnapshot.customerName||lastSnapshot.customerAddress||'';
   const name=prompt('Label this quote:',defaultName);
   if(!name)return;
-  const quote={...lastSnapshot,name,date:new Date().toLocaleDateString('en-CA'),id:Date.now(),photo:photoData};
+  const quote={...lastSnapshot,name,date:new Date().toLocaleDateString('en-CA'),id:Date.now(),photo:photoData,drawingImg,drawingState};
   savedQuotes.unshift(quote);localStorage.setItem('tycon_quotes',JSON.stringify(savedQuotes));
   renderSaved();showToast('Quote saved!');
 }
@@ -1334,6 +1306,10 @@ function setFilter(f,btn){
 }
 function togglePhoto(id){
   const wrap=document.getElementById('wrap-'+id);
+  if(wrap)wrap.classList.toggle('open');
+}
+function toggleDrawing(id){
+  const wrap=document.getElementById('wrap-draw-'+id);
   if(wrap)wrap.classList.toggle('open');
 }
 function loadQuoteForEdit(id){
@@ -1364,9 +1340,25 @@ function loadQuoteForEdit(id){
   // Load photo if saved
   if(q.photo){
     currentPhotoDataUrl=q.photo;
-    const preview=document.getElementById('scan-preview');
-    preview.src=q.photo;preview.style.display='block';
-    document.getElementById('clear-photo-btn').style.display='inline-flex';
+    document.getElementById('job-photo-preview').src=q.photo;
+    document.getElementById('job-photo-preview-wrap').style.display='block';
+    document.getElementById('job-photo-empty').style.display='none';
+  }
+
+  // Restore drawing state
+  if(q.drawingState){
+    const ds=q.drawingState;
+    padPosts=ds.posts||[];
+    padSegments=ds.segments||[];
+    padColumns=ds.columns||[];
+    padWallLines=ds.wallLines||[];
+    padTextLabels=ds.textLabels||[];
+    padPostCounter=ds.postCounter||padPosts.length+1;
+    padColCounter=ds.colCounter||padColumns.length+1;
+    padPendingFrom=null;padPendingSegment=null;padWallStart=null;padPendingWall=null;
+    updatePadSummary();
+    // Redraw on canvas if overlay is open, otherwise queue it
+    setTimeout(()=>{if(fsCtx&&fsW){fsDraw();}},100);
   }
 
   // Restore product fields
@@ -1414,7 +1406,36 @@ function renderSaved(){
     if(q.postQty)parts.push(`${q.postQty} posts (${q.postSize}")`);
     if(q.spQty)parts.push(`${q.spQty} spindles`);
     parts.push(q.colour);
-    const photoHtml=q.photo?`<div class="qi-photo-wrap" id="wrap-${q.id}"><img src="${q.photo}" class="qi-photo" onclick="togglePhoto(${q.id})" alt="Site sketch"></div>`:'';
+    const photoHtml=q.photo?`<div class="qi-photo-wrap" id="wrap-${q.id}"><img src="${q.photo}" class="qi-photo" onclick="togglePhoto(${q.id})" alt="Job photo"></div>`:'';
+    const drawingHtml=q.drawingImg?`<div class="qi-photo-wrap" id="wrap-draw-${q.id}"><img src="${q.drawingImg}" class="qi-photo" style="background:#f5f5f0" onclick="toggleDrawing(${q.id})" alt="Floor plan"></div>`:'';
+    const statusClass='qi-status status-'+(q.jobStatus||'Lead');
+    const statusLabel=q.jobStatus||'Lead';
+    const phoneLine=q.customerPhone?`<div style="font-size:12px;color:var(--grey-400);margin-top:1px">${q.customerPhone}</div>`:'';
+    const addrLine=q.customerAddress?`<div style="font-size:12px;color:var(--grey-400);margin-top:1px">${q.customerAddress}</div>`:'';
+    const notesLine=q.jobNotes?`<div style="font-size:12px;color:var(--grey-400);margin-top:3px;font-style:italic">${q.jobNotes}</div>`:'';
+    return `<div class="quote-item" style="flex-direction:column;align-items:stretch;gap:.5rem">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem">
+        <div class="qi-left">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+            <div class="qi-name">${q.name}</div>
+            <span class="${statusClass}">${statusLabel}</span>
+          </div>
+          ${phoneLine}
+          ${addrLine}
+          <div class="qi-meta" style="margin-top:2px">${q.date} &nbsp;&middot;&nbsp; ${parts.join(' &nbsp;&middot;&nbsp; ')}</div>
+          ${notesLine}
+        </div>
+        <div style="display:flex;align-items:center;gap:.5rem;flex-shrink:0">
+          <div class="qi-total">${fmt(q.total)}</div>
+          <button class="qi-photo-btn" onclick="loadQuoteForEdit(${q.id})" title="Edit">&#9998;</button>
+          ${q.photo?`<button class="qi-photo-btn" onclick="togglePhoto(${q.id})" title="View photo">&#128247;</button>`:''}
+          ${q.drawingImg?`<button class="qi-photo-btn" onclick="toggleDrawing(${q.id})" title="View drawing">&#9998;&#x20DE;</button>`:''}
+          <button class="qi-del" onclick="deleteQuote(${q.id})" title="Delete">&times;</button>
+        </div>
+      </div>
+      ${photoHtml}
+      ${drawingHtml}
+    </div>`;
     const statusClass='qi-status status-'+(q.jobStatus||'Lead');
     const statusLabel=q.jobStatus||'Lead';
     const phoneLine=q.customerPhone?`<div style="font-size:12px;color:var(--grey-400);margin-top:1px">${q.customerPhone}</div>`:'';    const addrLine=q.customerAddress?`<div style="font-size:12px;color:var(--grey-400);margin-top:1px">${q.customerAddress}</div>`:'';
@@ -1455,7 +1476,12 @@ function resetAll(){
   ['colour','handrail','railing-type','railing-height','post-size','spindle-type','p-col-size','job-status'].forEach(id=>document.getElementById(id).selectedIndex=0);
   ['customer-name','customer-phone','customer-address','job-notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   ['install-cost','linear-ft','post-qty','spindle-qty','p-gate-addon','p-sc-gate','p-reg-gate','p-stair','p-ballcaps','p-pegleg','p-angle-adapter','p-handrail','p-handrail-brackets','p-col-qty'].forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.classList.remove('ai-filled');}});
-  clearPhoto();calc();
+  // Clear drawing pad
+  padPosts=[];padSegments=[];padColumns=[];padWallLines=[];padTextLabels=[];
+  padPostCounter=1;padColCounter=1;padPendingFrom=null;padPendingSegment=null;padWallStart=null;padPendingWall=null;
+  if(fsCtx&&fsW)fsDraw();
+  updatePadSummary();
+  clearJobPhoto();calc();
 }
 
 function roundToNearest50(n){
