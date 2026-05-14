@@ -49,6 +49,26 @@
   .btn-danger{background:transparent;border:1px solid #f7c1c1;color:var(--danger)}.btn-danger:hover{background:#fcebeb}
   .btn-sm{height:34px;padding:0 1rem;font-size:.8rem}
 
+  /* ── RAILING REQUIRED HIGHLIGHT ── */
+  .railing-required {
+    border: 2px solid var(--danger) !important;
+    background: #fff8f8 !important;
+    box-shadow: 0 0 0 3px rgba(192,57,43,.1) !important;
+  }
+  .railing-required-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: .75rem;
+    color: var(--danger);
+    font-weight: 500;
+    margin-top: .375rem;
+  }
+  .railing-required-label::before {
+    content: '⚠';
+    font-size: .85rem;
+  }
+
   /* Scan */
   .scan-zone{border:1.5px dashed var(--grey-200);border-radius:var(--radius-lg);padding:1.5rem;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;margin-bottom:.75rem;position:relative}
   .scan-zone:hover{border-color:var(--accent);background:var(--accent-light)}
@@ -108,7 +128,6 @@
   .qi-meta{font-size:.78rem;color:var(--grey-400);margin-top:2px}
   .qi-total{font-size:1rem;font-weight:500;font-family:'DM Serif Display',serif;white-space:nowrap}
   .qi-del{background:none;border:none;cursor:pointer;color:var(--grey-400);font-size:1.1rem;padding:4px;line-height:1;transition:color .15s}.qi-del:hover{color:var(--danger)}
-  .no-quotes{text-align:center;padding:1.5rem;color:var(--grey-400);font-size:.875rem}
 
   .qi-photo-wrap{display:none;margin-top:.25rem}
   .qi-photo-wrap.open{display:block}
@@ -127,7 +146,6 @@
   .product-select{height:36px;padding:0 2rem 0 .625rem;border:1px solid var(--grey-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:16px;color:var(--black);background:var(--white);appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239a9a92' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .5rem center;cursor:pointer;flex:1}
   .product-select:focus{outline:none;border-color:var(--accent)}
   .product-subtotal{font-size:.875rem;font-weight:500;color:var(--black);white-space:nowrap;min-width:60px;text-align:right}
-
 
   /* Fullscreen drawing mode */
   .fs-overlay{display:none;position:fixed;inset:0;background:var(--white);z-index:9999;flex-direction:column;padding:0}
@@ -309,11 +327,14 @@
       </div>
     </div>
 
-    <div class="card">
+    <!-- RAILING CARD — id added for highlight targeting -->
+    <div class="card" id="railing-card">
       <p class="sec-label">Railing</p>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:.875rem">
-        <div class="fgroup"><label>Railing type</label>
-          <select id="railing-type" onchange="calc()"><option value="">— select —</option></select>
+        <div class="fgroup">
+          <label>Railing type</label>
+          <select id="railing-type" onchange="updateRailingHighlight();calc()"><option value="">— select —</option></select>
+          <span class="railing-required-label" id="railing-warning">Select a railing style to include material cost</span>
         </div>
         <div class="fgroup"><label>Height</label>
           <select id="railing-height" onchange="calc()"><option value="36">36"</option><option value="42">42"</option></select>
@@ -357,7 +378,6 @@
       <div id="products-body" style="display:none;padding:0 1.5rem 1.5rem;border-top:1px solid var(--grey-100)">
       <div style="height:.75rem"></div>
 
-      <!-- Gate Addon — flat, no qty -->
       <div class="product-row">
         <span class="product-label">Gate addon</span>
         <span class="product-price">$90 each</span>
@@ -365,7 +385,6 @@
         <span class="product-subtotal" id="ps-gate-addon"></span>
       </div>
 
-      <!-- Self Closing Gate — flat, no qty -->
       <div class="product-row">
         <span class="product-label">Self closing gate (hinges &amp; latch)</span>
         <span class="product-price">$95 each</span>
@@ -373,7 +392,6 @@
         <span class="product-subtotal" id="ps-sc-gate"></span>
       </div>
 
-      <!-- Regular Gate — flat, no qty -->
       <div class="product-row">
         <span class="product-label">Regular gate (hinges &amp; latch)</span>
         <span class="product-price">$85 each</span>
@@ -381,7 +399,6 @@
         <span class="product-subtotal" id="ps-reg-gate"></span>
       </div>
 
-      <!-- Stair Template — qty -->
       <div class="product-row">
         <span class="product-label">Stair template</span>
         <span class="product-price">$25 each</span>
@@ -389,7 +406,6 @@
         <span class="product-subtotal" id="ps-stair"></span>
       </div>
 
-      <!-- Ball Caps — auto qty -->
       <div class="product-row">
         <span class="product-label">Ball caps</span>
         <span class="product-price">$25 each</span>
@@ -397,7 +413,6 @@
         <span class="product-subtotal" id="ps-ballcaps"></span>
       </div>
 
-      <!-- Peg Leg — qty -->
       <div class="product-row">
         <span class="product-label">Peg leg</span>
         <span class="product-price">$5.50 each</span>
@@ -405,7 +420,6 @@
         <span class="product-subtotal" id="ps-pegleg"></span>
       </div>
 
-      <!-- Angle Adapter — flat, no qty -->
       <div class="product-row">
         <span class="product-label">Angle adapter</span>
         <span class="product-price">$50 each</span>
@@ -413,7 +427,6 @@
         <span class="product-subtotal" id="ps-angle-adapter"></span>
       </div>
 
-      <!-- Handrail — per ft -->
       <div class="product-row">
         <span class="product-label">Handrail</span>
         <span class="product-price">$18/ft</span>
@@ -421,7 +434,6 @@
         <span class="product-subtotal" id="ps-handrail"></span>
       </div>
 
-      <!-- Handrail Brackets — qty -->
       <div class="product-row">
         <span class="product-label">Handrail brackets</span>
         <span class="product-price">$11 each</span>
@@ -429,7 +441,6 @@
         <span class="product-subtotal" id="ps-handrail-brackets"></span>
       </div>
 
-      <!-- Columns — size dropdown + qty -->
       <div class="product-row" style="flex-wrap:wrap;gap:.5rem">
         <span class="product-label" style="width:100%;margin-bottom:.25rem">Column</span>
         <select class="product-select" id="p-col-size" onchange="calc()">
@@ -561,6 +572,20 @@ let SPINDLES=CFG.spindles;
 
 const COLOUR_DOTS={"Black":"#1a1a1a","Pewter":"#8e8e8e","White":"#e8e8e4","Brown":"#6b3a2a","Clay":"#b5956a","Sandlewood":"#c8a882","Cashmere":"#d4c4a8"};
 
+/* ── Railing highlight safeguard ── */
+function updateRailingHighlight(){
+  const card=document.getElementById('railing-card');
+  const warning=document.getElementById('railing-warning');
+  const selected=document.getElementById('railing-type').value;
+  if(!selected){
+    card.classList.add('railing-required');
+    if(warning)warning.style.display='flex';
+  } else {
+    card.classList.remove('railing-required');
+    if(warning)warning.style.display='none';
+  }
+}
+
 /* ── Setup overlay functions ── */
 function openSetup(){
   const pin=prompt('Enter admin PIN to access settings:');
@@ -575,21 +600,17 @@ function buildSetupUI(){
   const cfg=CFG;
   document.getElementById('setup-company').value=cfg.companyName||'';
   document.getElementById('setup-pin').value=cfg.pin||'1234';
-  // Posts
   document.getElementById('setup-post-2').value=cfg.posts['2']||'';
   document.getElementById('setup-post-3').value=cfg.posts['3']||'';
   document.getElementById('setup-post-4').value=cfg.posts['4']||'';
-  // Spindles
   document.getElementById('setup-sp-wall-reg').value=cfg.spindles['WALL-regular']||'';
   document.getElementById('setup-sp-wall-plat').value=cfg.spindles['WALL-platinum']||'';
   document.getElementById('setup-sp-mini-reg').value=cfg.spindles['MINI-regular']||'';
-  // Products
   const prods=cfg.products||{};
   ['gate-addon','sc-gate','reg-gate','stair','ballcaps','pegleg','angle-adapter','handrail','handrail-brackets'].forEach(k=>{
     const el=document.getElementById('setup-prod-'+k);
     if(el)el.value=prods[k]||'';
   });
-  // Railings table
   const tbody=document.getElementById('setup-railings-body');
   tbody.innerHTML='';
   cfg.railings.forEach((r,i)=>{
@@ -648,13 +669,12 @@ function saveSetup(){
   RAILINGS=CFG.railings;
   POSTS=CFG.posts;
   SPINDLES=CFG.spindles;
-  // Update company name in header
   const nameEl=document.getElementById('company-name-display');
   if(nameEl)nameEl.textContent=CFG.companyName;
-  // Rebuild railing dropdown
   const rtSel=document.getElementById('railing-type');
   rtSel.innerHTML='<option value="">— select —</option>';
   RAILINGS.forEach(r=>{const o=document.createElement('option');o.value=r.code;o.textContent=r.code;rtSel.appendChild(o);});
+  updateRailingHighlight();
   closeSetup();
   showToast('Settings saved!');
   calc();
@@ -679,6 +699,8 @@ RAILINGS.forEach(r=>{const o=document.createElement('option');o.value=r.code;o.t
 // Apply company name on load
 const nameEl=document.getElementById('company-name-display');
 if(nameEl)nameEl.textContent=CFG.companyName||'Quote Tool';
+// Run highlight on load
+updateRailingHighlight();
 // Show setup prompt if first time (no config saved)
 if(!loadConfig()){setTimeout(()=>{if(confirm('Welcome! No pricing is configured yet. Set up your pricing now?')){openSetup();}},500);}
 
@@ -729,16 +751,13 @@ function showSectionPanel(parsed){
   const container=document.getElementById('sections-container');
   container.innerHTML='';
   sectionIdCounter=0;
-
   document.getElementById('s-posts').value=parsed.post_count||'';
-
   const sections=parsed.sections&&parsed.sections.length>0?parsed.sections:[];
   if(sections.length>0){
     sections.forEach(v=>addSection(v));
   } else {
     addSection(null);
   }
-
   document.getElementById('section-panel').classList.add('show');
   updateSectionSummary();
 }
@@ -751,21 +770,17 @@ function applysections(){
     if(!isNaN(v)&&v>0){total+=v;count++;}
   });
   const posts=document.getElementById('s-posts').value;
-
   const lfEl=document.getElementById('linear-ft');
   lfEl.value=Math.round(total*10)/10;
   lfEl.classList.add('ai-filled');
-
   if(posts){
     const pEl=document.getElementById('post-qty');
     pEl.value=posts;
     pEl.classList.add('ai-filled');
   }
-
   const spEl=document.getElementById('spindle-qty');
   spEl.value=count*2;
   spEl.classList.add('ai-filled');
-
   document.getElementById('section-panel').classList.remove('show');
   calc();
   showToast(`Applied — ${total.toFixed(1)} ft across ${count} section${count!==1?'s':''}, ${count*2} spindles.`);
@@ -799,7 +814,6 @@ function clearJobPhoto(){
 function clearPhoto(){clearJobPhoto();}
 
 /* ── Calculator ── */
-
 function switchPadTab(id, btn){
   document.querySelectorAll('.pad-tab').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.pad-pane').forEach(p=>p.classList.remove('active'));
@@ -809,7 +823,6 @@ function switchPadTab(id, btn){
 }
 
 /* ── Drawing Pad ── */
-
 function openFsDrawing(){
   document.getElementById('fs-overlay').classList.add('open');
   document.body.style.overflow='hidden';
@@ -845,26 +858,20 @@ function fsResize(){
 function fsDraw(){
   if(!fsCtx||!fsW)return;
   fsCtx.clearRect(0,0,fsW,fsH);
-  // grid
   fsCtx.strokeStyle='#f0f0ec';fsCtx.lineWidth=1;
   for(let x=0;x<fsW;x+=50){fsCtx.beginPath();fsCtx.moveTo(x,0);fsCtx.lineTo(x,fsH);fsCtx.stroke();}
   for(let y=0;y<fsH;y+=50){fsCtx.beginPath();fsCtx.moveTo(0,y);fsCtx.lineTo(fsW,y);fsCtx.stroke();}
-  // segments
-  // wall sections — same blue as connected sections, short tick at each end
   padWallLines.forEach(w=>{
     const angle=Math.atan2(w.y2-w.y1,w.x2-w.x1);
     const perpX=Math.sin(angle)*10, perpY=-Math.cos(angle)*10;
-    // main line
     fsCtx.beginPath();fsCtx.moveTo(w.x1,w.y1);fsCtx.lineTo(w.x2,w.y2);
     fsCtx.strokeStyle='#378ADD';fsCtx.lineWidth=3;fsCtx.stroke();
-    // short perpendicular tick at each end (wall marker)
     [[w.x1,w.y1],[w.x2,w.y2]].forEach(([ex,ey])=>{
       fsCtx.beginPath();
       fsCtx.moveTo(ex-perpX,ey-perpY);
       fsCtx.lineTo(ex+perpX,ey+perpY);
       fsCtx.strokeStyle='#378ADD';fsCtx.lineWidth=2.5;fsCtx.stroke();
     });
-    // label — same style as connected sections
     const mx=(w.x1+w.x2)/2,my=(w.y1+w.y2)/2;
     let labelAngle=angle;
     if(labelAngle>Math.PI/2)labelAngle-=Math.PI;
@@ -877,7 +884,6 @@ function fsDraw(){
     fsCtx.textAlign='center';fsCtx.textBaseline='middle';fsCtx.fillText(label,0,0);
     fsCtx.restore();
   });
-  // text labels
   padTextLabels.forEach(t=>{
     fsCtx.font='14px sans-serif';
     fsCtx.fillStyle='#0f0f0f';
@@ -885,13 +891,10 @@ function fsDraw(){
     fsCtx.textBaseline='top';
     fsCtx.fillText(t.text,t.x,t.y);
   });
-
-  // wall start preview dot
   if(padMode==='wall'&&padWallStart){
     fsCtx.beginPath();fsCtx.arc(padWallStart.x,padWallStart.y,5,0,Math.PI*2);
     fsCtx.fillStyle='#854F0B';fsCtx.fill();
   }
-
   padSegments.forEach(s=>{
     const p1=padPosts.find(p=>p.id===s.from)||padColumns.find(c=>c.id===s.from);
     const p2=padPosts.find(p=>p.id===s.to)||padColumns.find(c=>c.id===s.to);
@@ -910,7 +913,6 @@ function fsDraw(){
     fsCtx.textAlign='center';fsCtx.textBaseline='middle';fsCtx.fillText(label,0,0);
     fsCtx.restore();
   });
-  // columns (circles)
   padColumns.forEach(c=>{
     const sel=padPendingFrom&&padPendingFrom.id===c.id;
     fsCtx.beginPath();fsCtx.arc(c.x,c.y,PAD_POST_R,0,Math.PI*2);
@@ -919,7 +921,6 @@ function fsDraw(){
     fsCtx.fillStyle=sel?'#c8a96e':'#993C1D';fsCtx.font='bold 10px sans-serif';
     fsCtx.textAlign='center';fsCtx.textBaseline='middle';fsCtx.fillText('C',c.x,c.y);
   });
-  // posts
   padPosts.forEach(p=>{
     const sel=padPendingFrom&&padPendingFrom.id===p.id;
     fsCtx.beginPath();fsCtx.rect(p.x-PAD_POST_R,p.y-PAD_POST_R,PAD_POST_R*2,PAD_POST_R*2);
@@ -938,9 +939,7 @@ function fsGetPos(e,canvas){
 }
 
 function fsHitPost(x,y){return padPosts.find(p=>Math.abs(p.x-x)<PAD_POST_R+6&&Math.abs(p.y-y)<PAD_POST_R+6);}
-
 function fsHitColumn(x,y){return padColumns.find(c=>Math.sqrt(Math.pow(c.x-x,2)+Math.pow(c.y-y,2))<PAD_POST_R+6);}
-
 function fsHitTextLabel(x,y){
   return padTextLabels.find(t=>{
     fsCtx.font='14px sans-serif';
@@ -948,7 +947,6 @@ function fsHitTextLabel(x,y){
     return x>=t.x-4&&x<=t.x+w+4&&y>=t.y-4&&y<=t.y+20;
   });
 }
-
 function fsHitWall(x,y){
   return padWallLines.find(w=>{
     const dx=w.x2-w.x1,dy=w.y2-w.y1,len=Math.sqrt(dx*dx+dy*dy);
@@ -958,7 +956,6 @@ function fsHitWall(x,y){
     return Math.sqrt(Math.pow(w.x1+t*dx-x,2)+Math.pow(w.y1+t*dy-y,2))<12;
   });
 }
-
 function fsHitSeg(x,y){
   return padSegments.find(s=>{
     const p1=padPosts.find(p=>p.id===s.from)||padColumns.find(c=>c.id===s.from);
@@ -1002,7 +999,6 @@ function fsTap(e){
       padWallLines.push(w);
       padWallStart=null;
       fsDraw();
-      // open length modal for this wall line
       padPendingWall=w;
       document.getElementById('pad-len-input').value='';
       document.getElementById('pad-modal-bg').classList.add('open');
@@ -1136,13 +1132,13 @@ window.padApply=function(){
   showToast('Layout applied — '+totalFt.toFixed(1)+'ft, '+nPosts+' posts, '+spindles+' spindles');
 };
 
-
 function updateStatusBadge(){
   const status=document.getElementById('job-status').value;
   const sel=document.getElementById('job-status');
   sel.className='';
   sel.style.borderColor=status==='Lead'?'#378ADD':status==='Quoted'?'#BA7517':status==='Scheduled'?'#1D9E75':'#639922';
 }
+
 function toggleProducts(){
   const body=document.getElementById('products-body');
   const chev=document.getElementById('products-chevron');
@@ -1150,6 +1146,7 @@ function toggleProducts(){
   body.style.display=open?'block':'none';
   chev.style.transform=open?'rotate(180deg)':'rotate(0deg)';
 }
+
 function calc(){
   const colour=document.getElementById('colour').value;
   const handrail=document.getElementById('handrail').value;
@@ -1162,9 +1159,6 @@ function calc(){
   const spType=document.getElementById('spindle-type').value;
   const spQty=parseFloat(document.getElementById('spindle-qty').value)||0;
 
-
-
-  // Products
   const P=CFG.products||{};
   const products=[
     {id:'gate-addon',        price:P['gate-addon']||90,  label:'Gate addon'},
@@ -1185,7 +1179,6 @@ function calc(){
     const el=document.getElementById('ps-'+p.id);
     if(el)el.textContent=sub>0?fmt(sub):'';
   });
-  // Column
   const colSize=parseFloat(document.getElementById('p-col-size').value)||0;
   const colQty=parseFloat(document.getElementById('p-col-qty').value)||0;
   const colSub=colSize*colQty;
@@ -1210,7 +1203,6 @@ function calc(){
     rows+=`<div style="font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--grey-400);padding:4px 0 2px">Materials</div>`;
     rows+=materialsRows;
     rows+=`<div class="brow" style="border-top:1px solid var(--grey-100);margin-top:4px"><span class="label" style="font-weight:500">Materials subtotal</span><span class="val">${fmt(materialsTotal)}</span></div>`;
-  const unroundedTotal=materialsTotal+(install||0);
   }
 
   total=materialsTotal;
@@ -1223,7 +1215,6 @@ function calc(){
 
   const roundedTotal=roundToNearest50(total);
   rows+=`<div class="total-row"><span class="label">Total</span><span class="val">${fmt(roundedTotal)}</span></div>`;
-  // Note: materials subtotal shows unrounded, only final total is rounded
   document.getElementById('breakdown-body').innerHTML=rows;
   lastTotal=total;
   const prodSnap={gateAddon:parseFloat(document.getElementById('p-gate-addon').value)||0,scGate:parseFloat(document.getElementById('p-sc-gate').value)||0,regGate:parseFloat(document.getElementById('p-reg-gate').value)||0,stair:parseFloat(document.getElementById('p-stair').value)||0,ballcaps:parseFloat(document.getElementById('p-ballcaps').value)||0,pegleg:parseFloat(document.getElementById('p-pegleg').value)||0,angleAdapter:parseFloat(document.getElementById('p-angle-adapter').value)||0,handrail:parseFloat(document.getElementById('p-handrail').value)||0,handrailBrackets:parseFloat(document.getElementById('p-handrail-brackets').value)||0,colSize:document.getElementById('p-col-size').value,colQty:parseFloat(document.getElementById('p-col-qty').value)||0};
@@ -1238,7 +1229,6 @@ function calc(){
 function saveQuote(){
   if(!lastSnapshot||lastTotal===0){showToast('Nothing to save yet.');return;}
 
-  // Compress photo if large
   let photoData=currentPhotoDataUrl||null;
   if(photoData&&photoData.length>200000){
     const canvas=document.createElement('canvas');
@@ -1250,7 +1240,6 @@ function saveQuote(){
     photoData=canvas.toDataURL('image/jpeg',0.7);
   }
 
-  // Capture drawing canvas image
   let drawingImg=null;
   const hasDrawing=padPosts.length>0||padWallLines.length>0||padSegments.length>0;
   if(hasDrawing){
@@ -1258,7 +1247,6 @@ function saveQuote(){
     if(fc&&fc.width>0){try{drawingImg=fc.toDataURL('image/png');}catch(e){}}
   }
 
-  // Serialize drawing state so it can be restored
   const drawingState=hasDrawing?{
     posts:JSON.parse(JSON.stringify(padPosts)),
     segments:JSON.parse(JSON.stringify(padSegments)),
@@ -1300,12 +1288,14 @@ function saveQuote(){
   savedQuotes.unshift(quote);localStorage.setItem('tycon_quotes',JSON.stringify(savedQuotes));
   renderSaved();showToast('Quote saved!');
 }
+
 function deleteQuote(id){
   if(!confirm('Delete this quote?'))return;
   savedQuotes=savedQuotes.filter(q=>q.id!==id);
   localStorage.setItem('tycon_quotes',JSON.stringify(savedQuotes));
   renderSaved();
 }
+
 let savedFilter='All';
 function setFilter(f,btn){
   savedFilter=f;
@@ -1313,6 +1303,7 @@ function setFilter(f,btn){
   btn.classList.add('active');
   renderSaved();
 }
+
 function togglePhoto(id){
   const wrap=document.getElementById('wrap-'+id);
   if(wrap)wrap.classList.toggle('open');
@@ -1321,12 +1312,12 @@ function toggleDrawing(id){
   const wrap=document.getElementById('wrap-draw-'+id);
   if(wrap)wrap.classList.toggle('open');
 }
+
 function loadQuoteForEdit(id){
   const q=savedQuotes.find(x=>x.id===id);
   if(!q)return;
   editingId=id;
 
-  // Populate all form fields
   if(q.railCode)document.getElementById('railing-type').value=q.railCode;
   document.getElementById('railing-height').value=q.height||'36';
   document.getElementById('linear-ft').value=q.linFt||'';
@@ -1337,16 +1328,14 @@ function loadQuoteForEdit(id){
   document.getElementById('colour').value=q.colour||'Black';
   document.getElementById('handrail').value=q.handrail||'Empress';
   document.getElementById('install-cost').value=q.install||'';
-
-  // Restore customer info
   document.getElementById('customer-name').value=q.customerName||'';
   document.getElementById('customer-phone').value=q.customerPhone||'';
   document.getElementById('customer-address').value=q.customerAddress||'';
   document.getElementById('job-notes').value=q.jobNotes||'';
   document.getElementById('job-status').value=q.jobStatus||'Lead';
   updateStatusBadge();
+  updateRailingHighlight();
 
-  // Load photo if saved
   if(q.photo){
     currentPhotoDataUrl=q.photo;
     document.getElementById('job-photo-preview').src=q.photo;
@@ -1354,7 +1343,6 @@ function loadQuoteForEdit(id){
     document.getElementById('job-photo-empty').style.display='none';
   }
 
-  // Restore drawing state
   if(q.drawingState){
     const ds=q.drawingState;
     padPosts=ds.posts||[];
@@ -1366,11 +1354,9 @@ function loadQuoteForEdit(id){
     padColCounter=ds.colCounter||padColumns.length+1;
     padPendingFrom=null;padPendingSegment=null;padWallStart=null;padPendingWall=null;
     updatePadSummary();
-    // Redraw on canvas if overlay is open, otherwise queue it
     setTimeout(()=>{if(fsCtx&&fsW){fsDraw();}},100);
   }
 
-  // Restore product fields
   if(q.products){
     const p=q.products;
     if(p.gateAddon)document.getElementById('p-gate-addon').value=p.gateAddon;
@@ -1384,7 +1370,7 @@ function loadQuoteForEdit(id){
     if(p.handrail)document.getElementById('p-handrail').value=p.handrail;
     if(p.handrailBrackets)document.getElementById('p-handrail-brackets').value=p.handrailBrackets;
   }
-  // Update save button to show "Update quote"
+
   document.getElementById('save-btn').textContent='Update quote';
   document.getElementById('editing-banner').style.display='flex';
   document.getElementById('editing-name').textContent=q.name;
@@ -1447,12 +1433,14 @@ function renderSaved(){
     </div>`;
   }).join('');
 }
+
 function switchTab(id,btn){
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
   btn.classList.add('active');document.getElementById('tab-'+id).classList.add('active');
   if(id==='saved')renderSaved();
 }
+
 function resetAll(){
   editingId=null;
   document.getElementById('save-btn').textContent='Save quote';
@@ -1460,31 +1448,30 @@ function resetAll(){
   ['colour','handrail','railing-type','railing-height','post-size','spindle-type','p-col-size','job-status'].forEach(id=>document.getElementById(id).selectedIndex=0);
   ['customer-name','customer-phone','customer-address','job-notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   ['install-cost','linear-ft','post-qty','spindle-qty','p-gate-addon','p-sc-gate','p-reg-gate','p-stair','p-ballcaps','p-pegleg','p-angle-adapter','p-handrail','p-handrail-brackets','p-col-qty'].forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.classList.remove('ai-filled');}});
-  // Clear drawing pad
   padPosts=[];padSegments=[];padColumns=[];padWallLines=[];padTextLabels=[];
   padPostCounter=1;padColCounter=1;padPendingFrom=null;padPendingSegment=null;padWallStart=null;padPendingWall=null;
   if(fsCtx&&fsW)fsDraw();
   updatePadSummary();
-  clearJobPhoto();calc();
+  clearJobPhoto();
+  updateRailingHighlight();
+  calc();
 }
 
 function roundToNearest50(n){
   const rem=n%50;
   return rem<25?n-rem:n+(50-rem);
 }
+
 function exportPDF(){
   if(!lastSnapshot||lastTotal===0){showToast('Build a quote first before exporting.');return;}
-  // Capture drawing pad canvas if it has content
   let padImageData=null;
   const fc=document.getElementById('fs-canvas');
   if(fc&&fc.width>0&&(padPosts.length>0||padWallLines.length>0||padSegments.length>0)){
     try{
       padImageData=fc.toDataURL('image/png');
-      // verify it's not a blank canvas
       if(padImageData==='data:,')padImageData=null;
     }catch(e){padImageData=null;}
   }
-  // Fallback: use saved photo from quote if pad is empty
   if(!padImageData&&lastSnapshot&&lastSnapshot.photo){
     padImageData=lastSnapshot.photo;
   }
@@ -1492,10 +1479,9 @@ function exportPDF(){
   const date=new Date().toLocaleDateString('en-CA',{year:'numeric',month:'long',day:'numeric'});
   const quoteNum='TRC-'+Date.now().toString().slice(-6);
 
-  // Build line items
-  const POSTS={"2":40,"3":42,"4":57};
-  const SPINDLES={"WALL-regular":4,"WALL-platinum":6,"MINI-regular":1};
-  const RAILINGS=[
+  const POSTS_PDF={"2":40,"3":42,"4":57};
+  const SPINDLES_PDF={"WALL-regular":4,"WALL-platinum":6,"MINI-regular":1};
+  const RAILINGS_PDF=[
     {code:"R1",p36:30,p42:32},{code:"R2",p36:34,p42:35},{code:"R3",p36:32.5,p42:33.5},
     {code:"R4",p36:34,p42:35},{code:"R4S",p36:53,p42:55},{code:"R5",p36:37,p42:38},
     {code:"R5S",p36:55,p42:57},{code:"R6",p36:35,p42:36},{code:"R6S",p36:54,p42:56},
@@ -1512,22 +1498,21 @@ function exportPDF(){
 
   let lineItems=[];
   if(q.railCode&&q.linFt>0){
-    const r=RAILINGS.find(x=>x.code===q.railCode);
+    const r=RAILINGS_PDF.find(x=>x.code===q.railCode);
     const rate=q.height==='42'?r.p42:r.p36;
     lineItems.push({desc:`Railing ${q.railCode} (${q.height}")`,qty:q.linFt,unit:'lin. ft',rate,total:rate*q.linFt});
   }
   if(q.postQty>0){
-    const rate=POSTS[q.postSize];
+    const rate=POSTS_PDF[q.postSize];
     lineItems.push({desc:`Posts (${q.postSize}")`,qty:q.postQty,unit:'posts',rate,total:rate*q.postQty});
   }
   if(q.spQty>0){
-    const rate=SPINDLES[q.spType];
+    const rate=SPINDLES_PDF[q.spType];
     const label=q.spType.replace('-',' ');
     lineItems.push({desc:`Spindles (${label})`,qty:q.spQty,unit:'spindles',rate,total:rate*q.spQty});
   }
   if(q.install>0) lineItems.push({desc:'Installation',qty:1,unit:'',rate:q.install,total:q.install});
 
-  // Additional products
   const prodMap=[
     {key:'gateAddon',label:'Gate addon',price:90},
     {key:'scGate',label:'Self closing gate',price:95},
@@ -1575,7 +1560,6 @@ function exportPDF(){
 </style>
 </head>
 <body>
-  <!-- Header -->
   <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #111">
     <div>
       <div style="font-family:'DM Serif Display',serif;font-size:28px;margin-bottom:4px">Tycon Railings</div>
@@ -1586,8 +1570,6 @@ function exportPDF(){
       <div style="font-size:13px;color:#888">${date}</div>
     </div>
   </div>
-
-  <!-- Customer info -->
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px">
     <div>
       <div style="font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:#888;margin-bottom:8px">Prepared for</div>
@@ -1600,8 +1582,6 @@ function exportPDF(){
       <table style="width:100%;border-collapse:collapse">${specRows}</table>
     </div>`:''}
   </div>
-
-  <!-- Line items -->
   <table style="width:100%;border-collapse:collapse;margin-bottom:14px">
     <thead>
       <tr style="background:#0f0f0f;color:#fafaf8">
@@ -1613,8 +1593,6 @@ function exportPDF(){
     </thead>
     <tbody>${lineRows}</tbody>
   </table>
-
-  <!-- Total -->
   <div style="display:flex;justify-content:flex-end;margin-bottom:16px">
     <div style="min-width:220px">
       <div style="display:flex;justify-content:space-between;padding:12px 0;border-top:2px solid #111">
@@ -1624,34 +1602,14 @@ function exportPDF(){
       <div style="font-size:11px;color:#888;margin-top:4px;text-align:right">All prices in CAD. HST not included.</div>
     </div>
   </div>
-
   ${padImageData?`<div style="margin-bottom:14px"><div style="font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:#888;margin-bottom:6px">Site layout</div><img src="${padImageData}" style="width:100%;max-height:220px;object-fit:contain;border:1px solid #e8e8e4;border-radius:6px;display:block"></div>`:''}
-  ${q.jobNotes?`<!-- Notes --><div style="background:#f5f5f3;border-radius:6px;padding:10px 14px;margin-bottom:14px"><div style="font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:#888;margin-bottom:6px">Notes</div><div style="font-size:13px;color:#333">${q.jobNotes}</div></div>`:''}
-
-  <!-- Footer -->
+  ${q.jobNotes?`<div style="background:#f5f5f3;border-radius:6px;padding:10px 14px;margin-bottom:14px"><div style="font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:#888;margin-bottom:6px">Notes</div><div style="font-size:13px;color:#333">${q.jobNotes}</div></div>`:''}
   <div style="border-top:1px solid #e8e8e4;padding-top:20px;font-size:12px;color:#aaa;text-align:center">
     This quote is valid for 30 days. Thank you for choosing Tycon Railings.
   </div>
-
-<div class="pdf-overlay" id="pdf-overlay">
-  <div class="pdf-header">
-    <span class="pdf-header-title">Quote preview</span>
-    <div class="pdf-header-btns">
-      <button class="pdf-hbtn pdf-hbtn-print" onclick="printPDF()">Print / Save PDF</button>
-      <button class="pdf-hbtn pdf-hbtn-close" onclick="closePDF()">&#10005; Close</button>
-    </div>
-  </div>
-  <div class="pdf-body">
-    <div class="pdf-doc" id="pdf-doc"></div>
-    <div style="text-align:center;padding:1.5rem 0 2rem">
-      <button onclick="closePDF()" style="height:44px;padding:0 2rem;background:#0f0f0f;color:#fafaf8;border:none;border-radius:8px;font-size:15px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif">&#10005; Close preview</button>
-    </div>
-  </div>
-</div>
 </body>
 </html>`;
 
-  // Extract just the body content from pdfHTML for the overlay
   const bodyMatch=pdfHTML.match(/<body>([\s\S]*)<\/body>/);
   const bodyContent=bodyMatch?bodyMatch[1]:pdfHTML;
   document.getElementById('pdf-doc').innerHTML=bodyContent;
@@ -1734,8 +1692,6 @@ renderSaved();
     </div>
   </div>
 </div>
-</body>
-</html>
 
 <!-- SETUP OVERLAY -->
 <div id="setup-overlay" style="display:none;position:fixed;inset:0;z-index:10000;background:#eceee9;flex-direction:column;overflow-y:auto">
@@ -1800,3 +1756,5 @@ renderSaved();
     </div>
   </div>
 </div>
+</body>
+</html>
