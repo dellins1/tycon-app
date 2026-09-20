@@ -47,10 +47,11 @@ export default async function handler(req, res) {
         res.status(400).json({ error: 'Quote id must be numeric.' });
         return;
       }
+      const payloadJson = JSON.stringify(quote);
       await sql`
         INSERT INTO quotes (id, payload, updated_at)
-        VALUES (${id}, ${sql.json(quote)}, now())
-        ON CONFLICT (id) DO UPDATE SET payload = ${sql.json(quote)}, updated_at = now()
+        VALUES (${id}, ${payloadJson}::jsonb, now())
+        ON CONFLICT (id) DO UPDATE SET payload = ${payloadJson}::jsonb, updated_at = now()
       `;
       res.status(200).json({ ok: true, id });
       return;
