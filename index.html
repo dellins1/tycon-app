@@ -689,6 +689,68 @@ function resetToDefaults(){
 }
 
 let savedQuotes=JSON.parse(localStorage.getItem('tycon_quotes')||'[]');
+let pendingDeletes=JSON.parse(localStorage.getItem('tycon_pending_deletes')||'[]');
+
+/* ── Cloud sync (Postgres via /api/quotes) — quotes persist to the cloud so they
+   survive a phone swap or cache clear; localStorage stays as a fast local cache
+   and offline fallback ── */
+function persistLocal(){
+  localStorage.setItem('tycon_quotes',JSON.stringify(savedQuotes));
+  localStorage.setItem('tycon_pending_deletes',JSON.stringify(pendingDeletes));
+}
+function apiListQuotes(){
+  return fetch('/api/quotes').then(r=>{if(!r.ok)throw new Error('list failed');return r.json();});
+}
+function apiSaveQuote(quote){
+  const clean={...quote};delete clean._pendingSync;
+  return fetch('/api/quotes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(clean)})
+    .then(r=>{if(!r.ok)throw new Error('save failed');return r.json();});
+}
+function apiDeleteQuoteRemote(id){
+  return fetch('/api/quotes?id='+encodeURIComponent(id),{method:'DELETE'})
+    .then(r=>{if(!r.ok)throw new Error('delete failed');return r.json();});
+}
+function syncQuoteToServer(quote){
+  apiSaveQuote(quote).then(()=>{
+    const q=savedQuotes.find(x=>x.id===quote.id);
+    if(q){delete q._pendingSync;persistLocal();}
+  }).catch(()=>{
+    const q=savedQuotes.find(x=>x.id===quote.id);
+    if(q){q._pendingSync=true;persistLocal();}
+  });
+}
+function queueDelete(id){
+  if(!pendingDeletes.includes(id))pendingDeletes.push(id);
+  persistLocal();
+  apiDeleteQuoteRemote(id).then(()=>{
+    pendingDeletes=pendingDeletes.filter(x=>x!==id);
+    persistLocal();
+  }).catch(()=>{});
+}
+function initCloudSync(){
+  const toPush=savedQuotes.filter(q=>q._pendingSync);
+  const toDelete=[...pendingDeletes];
+  Promise.all([
+    Promise.all(toPush.map(q=>apiSaveQuote(q).then(()=>{delete q._pendingSync;}).catch(()=>{}))),
+    Promise.all(toDelete.map(id=>apiDeleteQuoteRemote(id).then(()=>{pendingDeletes=pendingDeletes.filter(x=>x!==id);}).catch(()=>{})))
+  ]).then(()=>{
+    persistLocal();
+    return apiListQuotes();
+  }).then(serverQuotes=>{
+    const stillPendingIds=new Set(savedQuotes.filter(q=>q._pendingSync).map(q=>q.id));
+    const deletedIds=new Set(pendingDeletes);
+    let merged=serverQuotes.filter(q=>!deletedIds.has(q.id));
+    savedQuotes.forEach(local=>{
+      if(stillPendingIds.has(local.id)&&!merged.some(m=>m.id===local.id)){
+        merged.push(local);
+      }
+    });
+    merged.sort((a,b)=>b.id-a.id);
+    savedQuotes=merged;
+    persistLocal();
+    renderSaved();
+  }).catch(()=>{ /* offline or API unreachable: keep using local cache */ });
+}
 let lastTotal=0,lastSnapshot=null;
 let sectionIdCounter=0;
 let currentPhotoDataUrl=null;
@@ -1273,11 +1335,12 @@ function saveQuote(){
         drawingImg:drawingImg||existing.drawingImg,
         drawingState:drawingState||existing.drawingState
       };
-      localStorage.setItem('tycon_quotes',JSON.stringify(savedQuotes));
+      persistLocal();
       editingId=null;
       document.getElementById('save-btn').textContent='Save quote';
       document.getElementById('editing-banner').style.display='none';
       renderSaved();showToast('Quote updated!');
+      syncQuoteToServer(savedQuotes[idx]);
       return;
     }
   }
@@ -1285,15 +1348,17 @@ function saveQuote(){
   const name=prompt('Label this quote:',defaultName);
   if(!name)return;
   const quote={...lastSnapshot,name,date:new Date().toLocaleDateString('en-CA'),id:Date.now(),photo:photoData,drawingImg,drawingState};
-  savedQuotes.unshift(quote);localStorage.setItem('tycon_quotes',JSON.stringify(savedQuotes));
+  savedQuotes.unshift(quote);persistLocal();
   renderSaved();showToast('Quote saved!');
+  syncQuoteToServer(quote);
 }
 
 function deleteQuote(id){
   if(!confirm('Delete this quote?'))return;
   savedQuotes=savedQuotes.filter(q=>q.id!==id);
-  localStorage.setItem('tycon_quotes',JSON.stringify(savedQuotes));
+  persistLocal();
   renderSaved();
+  queueDelete(id);
 }
 
 let savedFilter='All';
@@ -1636,6 +1701,7 @@ function printPDF(){
 
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
 renderSaved();
+initCloudSync();
 </script>
 
 <div class="fs-overlay" id="fs-overlay">
