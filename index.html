@@ -698,16 +698,44 @@ function persistLocal(){
   localStorage.setItem('tycon_quotes',JSON.stringify(savedQuotes));
   localStorage.setItem('tycon_pending_deletes',JSON.stringify(pendingDeletes));
 }
+/* The API needs the app password (header x-tycon-key). It is asked for once per
+   device and remembered; a wrong or changed password asks again. One prompt is
+   shared when several requests need it at the same time. */
+let _keyPrompt=null;
+function askAppPassword(){
+  if(!_keyPrompt){
+    _keyPrompt=Promise.resolve().then(()=>{
+      const k=prompt('Enter your Tycon app password:');
+      if(k){localStorage.setItem('tycon_app_key',k.trim());}
+      return !!k;
+    }).finally(()=>{setTimeout(()=>{_keyPrompt=null;},0);});
+  }
+  return _keyPrompt;
+}
+function authFetch(url,opts={},retried=false){
+  const key=localStorage.getItem('tycon_app_key')||'';
+  const headers={...(opts.headers||{}),'x-tycon-key':key};
+  return fetch(url,{...opts,headers}).then(r=>{
+    if(r.status===401&&!retried){
+      const current=localStorage.getItem('tycon_app_key')||'';
+      if(current&&current!==key)return authFetch(url,opts,true); // a password was entered meanwhile
+      localStorage.removeItem('tycon_app_key');
+      return askAppPassword().then(ok=>ok?authFetch(url,opts,true):r);
+    }
+    if(r.status===401)showToast('Wrong password. Reload the page to try again.');
+    return r;
+  });
+}
 function apiListQuotes(){
-  return fetch('/api/quotes').then(r=>{if(!r.ok)throw new Error('list failed');return r.json();});
+  return authFetch('/api/quotes').then(r=>{if(!r.ok)throw new Error('list failed');return r.json();});
 }
 function apiSaveQuote(quote){
   const clean={...quote};delete clean._pendingSync;
-  return fetch('/api/quotes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(clean)})
+  return authFetch('/api/quotes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(clean)})
     .then(r=>{if(!r.ok)throw new Error('save failed');return r.json();});
 }
 function apiDeleteQuoteRemote(id){
-  return fetch('/api/quotes?id='+encodeURIComponent(id),{method:'DELETE'})
+  return authFetch('/api/quotes?id='+encodeURIComponent(id),{method:'DELETE'})
     .then(r=>{if(!r.ok)throw new Error('delete failed');return r.json();});
 }
 function syncQuoteToServer(quote){

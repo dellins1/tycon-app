@@ -1,6 +1,12 @@
+import { checkAccess } from './_auth.js';
+
 export const config = { runtime: 'edge' };
 
 export default async function handler(req) {
+  const denied = checkAccess(req.headers.get('x-tycon-key'));
+  if (denied) {
+    return new Response(JSON.stringify({ error: denied.error }), { status: denied.status, headers: { 'Content-Type': 'application/json' } });
+  }
   if (req.method !== 'POST') {
     return new Response('Method not allowed', { status: 405 });
   }

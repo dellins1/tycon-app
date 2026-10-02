@@ -1,4 +1,5 @@
 import { neon } from '@neondatabase/serverless';
+import { checkAccess } from './_auth.js';
 
 const connectionString =
   process.env.DATABASE_URL ||
@@ -20,6 +21,11 @@ function ensureSchema(sql) {
 }
 
 export default async function handler(req, res) {
+  const denied = checkAccess(req.headers['x-tycon-key']);
+  if (denied) {
+    res.status(denied.status).json({ error: denied.error });
+    return;
+  }
   if (!connectionString) {
     res.status(500).json({ error: 'Database is not configured (missing DATABASE_URL).' });
     return;
